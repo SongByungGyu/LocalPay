@@ -1,0 +1,94 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Xcode / iOS
+DerivedData/
+build/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+xcuserdata/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# CocoaPods (사용하지 않지만 대비)
+Pods/
+*.xcworkspace/xcuserdata/
+
+# SwiftPM
+.build/
+.swiftpm/
+Package.resolved
+
+# Fastlane (미사용, 향후 대비)
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Node / JS (향후 Backend 대비)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnp.*
+
+# Python (향후 워커/툴 대비)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Secrets
+.env
+.env.*
+!.env.example
+Secrets.swift
+Secrets.xcconfig
+*.p8
+*.p12
+*.pem
+*.key
+*.cer
+*.mobileprovision
+GoogleService-Info.plist
+firebase.json.local
+
+# Docker (향후 Backend 대비 - 로컬 override 파일만)
+docker-compose.override.yml
+docker-compose.override.yaml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.history/
+
+# Claude Code harness
+.claude/
+CLAUDE.local.md
+
+# 기타 배포/아카이브
+LocalPay_Claude_Handoff.zip
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+
+# Logs
+*.log
+logs/

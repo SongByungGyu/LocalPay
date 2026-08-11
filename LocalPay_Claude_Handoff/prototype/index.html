@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>동네페이맵 - 온누리·지역화폐 사용처</title>
+  <style>
+    :root{
+      --bg:#f5f7fa;
+      --card:#ffffff;
+      --text:#16181d;
+      --sub:#6b7280;
+      --line:#e7e9ee;
+      --primary:#2563eb;
+      --primary-soft:#eaf1ff;
+      --onnuri:#10b981;
+      --local:#f59e0b;
+      --both:#7c3aed;
+      --danger:#ef4444;
+      --shadow:0 10px 30px rgba(15,23,42,.10);
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:#dfe6ef;color:var(--text);font-family:Inter, Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif}
+    button,input{font:inherit}
+    button{cursor:pointer}
+    .page{min-height:100vh;display:flex;justify-content:center;padding:18px}
+    .phone{width:min(430px,100%);min-height:900px;background:var(--bg);position:relative;overflow:hidden;border-radius:34px;box-shadow:0 30px 80px rgba(15,23,42,.25)}
+    .statusbar{height:28px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-size:12px;font-weight:700}
+    .app{height:calc(100vh - 36px);min-height:840px;max-height:920px;position:relative;background:var(--bg);overflow:hidden}
+    .view{position:absolute;inset:0 0 72px 0;display:none;overflow:auto}
+    .view.active{display:block}
+
+    /* MAP */
+    .map-view{overflow:hidden;background:#e9eef4}
+    .top-panel{position:absolute;z-index:20;top:0;left:0;right:0;padding:14px 14px 0;background:linear-gradient(#fff 65%,rgba(255,255,255,0))}
+    .location-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .location{font-weight:800;font-size:16px;display:flex;gap:6px;align-items:center}
+    .bell{width:36px;height:36px;border:0;border-radius:12px;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.08);font-size:17px}
+    .search{display:flex;gap:8px;align-items:center;background:white;border:1px solid var(--line);box-shadow:0 8px 24px rgba(15,23,42,.08);border-radius:18px;padding:12px 14px}
+    .search input{border:0;outline:0;flex:1;background:transparent;font-size:15px}
+    .filter-strip,.category-strip{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+    .filter-strip::-webkit-scrollbar,.category-strip::-webkit-scrollbar{display:none}
+    .chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 13px;white-space:nowrap;font-size:13px;font-weight:700;color:#4b5563}
+    .chip.active{background:#111827;color:white;border-color:#111827}
+    .chip.pay.active[data-pay="onnuri"]{background:var(--onnuri);border-color:var(--onnuri)}
+    .chip.pay.active[data-pay="local"]{background:var(--local);border-color:var(--local)}
+    .chip.pay.active[data-pay="both"]{background:var(--both);border-color:var(--both)}
+
+    .map{position:absolute;inset:146px 0 0;background:
+      linear-gradient(30deg, transparent 0 46%, rgba(255,255,255,.85) 47% 53%, transparent 54%),
+      linear-gradient(120deg, transparent 0 45%, rgba(255,255,255,.88) 46% 54%, transparent 55%),
+      linear-gradient(0deg, transparent 0 28%, rgba(255,255,255,.9) 29% 34%, transparent 35% 64%, rgba(255,255,255,.9) 65% 70%, transparent 71%),
+      #dce8df;
+    }
+    .map:before,.map:after{content:"";position:absolute;background:#c8ddc5;border-radius:40px;filter:blur(.2px)}
+    .map:before{width:160px;height:90px;left:-30px;top:150px;transform:rotate(-12deg)}
+    .map:after{width:130px;height:120px;right:-18px;top:30px;transform:rotate(18deg)}
+    .river{position:absolute;width:120%;height:64px;left:-40px;top:46%;background:#b9defb;transform:rotate(-8deg);border:5px solid rgba(255,255,255,.7)}
+    .road-label{position:absolute;font-size:10px;color:#6b7280;background:rgba(255,255,255,.72);padding:3px 6px;border-radius:6px}
+    .map-label{position:absolute;font-size:11px;font-weight:800;color:#667085;opacity:.8}
+    .marker{position:absolute;border:0;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;gap:3px;background:transparent;z-index:4}
+    .marker-dot{width:40px;height:40px;border-radius:16px 16px 16px 4px;transform:rotate(-45deg);display:grid;place-items:center;color:white;box-shadow:0 7px 16px rgba(15,23,42,.2);border:3px solid white}
+    .marker-dot span{transform:rotate(45deg);font-size:17px}
+    .marker-name{background:white;padding:5px 8px;border-radius:9px;font-size:10px;font-weight:800;box-shadow:0 3px 10px rgba(0,0,0,.12);white-space:nowrap}
+    .marker.onnuri .marker-dot{background:var(--onnuri)}
+    .marker.local .marker-dot{background:var(--local)}
+    .marker.both .marker-dot{background:var(--both)}
+    .me{position:absolute;left:51%;top:55%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:50%;background:#2563eb;border:4px solid white;box-shadow:0 0 0 8px rgba(37,99,235,.18),0 3px 8px rgba(0,0,0,.2);z-index:2}
+    .floating-controls{position:absolute;right:14px;bottom:186px;z-index:12;display:flex;flex-direction:column;gap:8px}
+    .floating-controls button{width:42px;height:42px;border:0;border-radius:14px;background:white;box-shadow:0 5px 16px rgba(15,23,42,.14);font-size:18px}
+    .summary-pill{position:absolute;left:14px;bottom:196px;z-index:11;background:#111827;color:#fff;border-radius:999px;padding:9px 12px;font-size:12px;font-weight:800;box-shadow:0 5px 16px rgba(0,0,0,.16)}
+
+    .peek-card{position:absolute;left:12px;right:12px;bottom:12px;z-index:15;background:#fff;border-radius:22px;padding:14px;box-shadow:var(--shadow);display:flex;gap:12px;align-items:center;border:1px solid rgba(255,255,255,.7)}
+    .peek-img{width:74px;height:74px;border-radius:16px;background:linear-gradient(135deg,#fff1db,#ffc368);display:grid;place-items:center;font-size:32px;flex:0 0 auto}
+    .peek-info{min-width:0;flex:1}
+    .peek-info h3{margin:0 0 4px;font-size:16px}
+    .meta{font-size:12px;color:var(--sub);display:flex;gap:6px;flex-wrap:wrap}
+    .badges{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+    .badge{font-size:11px;font-weight:800;border-radius:999px;padding:5px 8px;background:#f2f4f7;color:#475467}
+    .badge.onnuri{background:#e9fbf4;color:#047857}
+    .badge.local{background:#fff4dd;color:#b45309}
+    .badge.both{background:#f1eaff;color:#6d28d9}
+    .distance{font-size:12px;font-weight:800;color:#344054}
+    .detail-btn{border:0;background:var(--primary);color:white;font-weight:800;border-radius:12px;padding:9px 11px;margin-top:9px}
+
+    /* LIST / FAVORITES */
+    .screen{padding:18px 14px 100px}
+    .screen-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+    .screen-header h2{margin:0;font-size:24px}
+    .subtext{margin:2px 0 0;color:var(--sub);font-size:13px}
+    .section-title{font-size:15px;font-weight:900;margin:22px 0 10px}
+    .store-list{display:flex;flex-direction:column;gap:10px}
+    .store-card{display:flex;gap:12px;background:white;padding:12px;border-radius:18px;border:1px solid var(--line);box-shadow:0 5px 18px rgba(15,23,42,.05)}
+    .store-thumb{width:76px;height:76px;border-radius:16px;display:grid;place-items:center;font-size:31px;background:#eef2f7;flex:0 0 auto}
+    .store-card h3{margin:1px 0 4px;font-size:15px}
+    .heart{margin-left:auto;border:0;background:transparent;font-size:22px;color:#c3c8d0}
+    .heart.active{color:#ef4444}
+
+    /* MY */
+    .my-hero{background:linear-gradient(135deg,#1d4ed8,#4338ca);color:#fff;border-radius:24px;padding:20px;margin-bottom:16px;box-shadow:0 12px 24px rgba(37,99,235,.22)}
+    .my-hero .name{font-size:22px;font-weight:900;margin-bottom:4px}
+    .my-hero .small{font-size:13px;opacity:.8}
+    .wallet{background:white;border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:10px}
+    .wallet-top{display:flex;align-items:center;justify-content:space-between}
+    .wallet-name{font-weight:900}
+    .wallet-balance{font-size:26px;font-weight:900;margin:14px 0 6px;letter-spacing:-.6px}
+    .wallet-note{font-size:12px;color:var(--sub)}
+    .refresh{border:0;background:#f2f4f7;border-radius:10px;padding:8px 10px;font-weight:800;color:#475467}
+    .policy-card{background:#fff9ea;border:1px solid #fde6a8;border-radius:18px;padding:14px;margin-top:10px}
+    .policy-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+    .policy-item{background:white;border-radius:14px;padding:12px}
+    .policy-item strong{display:block;font-size:18px;margin-top:4px}
+    .menu-card{background:white;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+    .menu-row{display:flex;align-items:center;justify-content:space-between;padding:15px 16px;border-bottom:1px solid var(--line);font-size:14px;font-weight:700}
+    .menu-row:last-child{border-bottom:0}
+
+    /* NAV */
+    .bottom-nav{position:absolute;z-index:50;left:0;right:0;bottom:0;height:72px;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:max(0px,env(safe-area-inset-bottom))}
+    .nav-btn{border:0;background:transparent;color:#98a2b3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;font-weight:800}
+    .nav-btn span:first-child{font-size:21px}
+    .nav-btn.active{color:#111827}
+
+    /* MODAL */
+    .overlay{position:absolute;inset:0;z-index:100;background:rgba(17,24,39,.45);display:none;align-items:flex-end}
+    .overlay.show{display:flex}
+    .sheet{width:100%;max-height:82%;overflow:auto;background:white;border-radius:28px 28px 0 0;padding:10px 16px 28px;animation:up .18s ease-out}
+    @keyframes up{from{transform:translateY(12%);opacity:.6}to{transform:none;opacity:1}}
+    .handle{width:46px;height:5px;border-radius:999px;background:#d0d5dd;margin:2px auto 14px}
+    .hero-image{height:160px;border-radius:20px;background:linear-gradient(135deg,#fff2df,#ffd48d);display:grid;place-items:center;font-size:62px;margin-bottom:16px}
+    .sheet-title-row{display:flex;justify-content:space-between;gap:10px}
+    .sheet h2{font-size:22px;margin:0 0 6px}
+    .close{width:36px;height:36px;border-radius:12px;border:0;background:#f2f4f7;font-size:18px}
+    .action-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+    .action{border:1px solid var(--line);background:#fff;border-radius:14px;padding:11px 5px;font-weight:800;font-size:12px}
+    .info-box{background:#f8fafc;border-radius:16px;padding:14px;margin-top:10px}
+    .info-box h4{margin:0 0 9px;font-size:14px}
+    .item-tags{display:flex;flex-wrap:wrap;gap:7px}
+    .item-tag{background:white;border:1px solid var(--line);border-radius:999px;padding:7px 9px;font-size:12px;font-weight:700}
+    .review{padding:12px 0;border-bottom:1px solid var(--line)}
+    .review:last-child{border-bottom:0}
+    .review-head{display:flex;justify-content:space-between;font-size:12px;color:var(--sub);margin-bottom:5px}
+    .review strong{color:#111827}
+    .verified{color:#047857;font-size:11px;font-weight:800}
+    .empty{padding:46px 20px;text-align:center;color:var(--sub)}
+
+    @media (max-width:500px){
+      .page{padding:0;background:var(--bg)}
+      .phone{width:100%;min-height:100vh;border-radius:0;box-shadow:none}
+      .app{height:calc(100vh - 28px);min-height:0;max-height:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <main class="phone">
+      <div class="statusbar"><span>11:34</span><span>●●● 5G 🔋</span></div>
+      <section class="app">
+        <section class="view map-view active" data-view="map">
+          <div class="top-panel">
+            <div class="location-row">
+              <div class="location">📍 안양시 동안구 <span style="font-size:11px;color:#98a2b3">▼</span></div>
+              <button class="bell" aria-label="알림">🔔</button>
+            </div>
+            <label class="search">🔎 <input id="searchInput" placeholder="가게, 상품, 시장을 검색해보세요" /></label>
+            <div class="filter-strip" id="payFilters">
+              <button class="chip pay active" data-pay="all">전체</button>
+              <button class="chip pay" data-pay="onnuri">온누리</button>
+              <button class="chip pay" data-pay="local">지역화폐</button>
+              <button class="chip pay" data-pay="both">둘 다</button>
+            </div>
+            <div class="category-strip" id="categoryFilters">
+              <button class="chip active" data-cat="all">전체</button>
+              <button class="chip" data-cat="food">🍚 음식점</button>
+              <button class="chip" data-cat="cafe">☕ 카페</button>
+              <button class="chip" data-cat="pharmacy">💊 약국</button>
+              <button class="chip" data-cat="mart">🛒 마트</button>
+              <button class="chip" data-cat="market">🏪 시장</button>
+              <button class="chip" data-cat="beauty">💇 미용</button>
+              <button class="chip" data-cat="life">🧰 생활</button>
+            </div>
+          </div>
+
+          <div class="map" id="mapArea">
+            <div class="river"></div>
+            <span class="map-label" style="left:16px;top:92px">평촌동</span>
+            <span class="map-label" style="right:28px;top:126px">범계역</span>
+            <span class="map-label" style="left:46px;bottom:118px">안양중앙시장</span>
+            <span class="road-label" style="left:180px;top:104px">관평로</span>
+            <span class="road-label" style="left:70px;top:310px">시민대로</span>
+            <div class="me" title="내 위치"></div>
+            <div id="markers"></div>
+            <div class="summary-pill" id="summaryPill">주변 사용처 8곳</div>
+            <div class="floating-controls"><button>⌖</button><button>＋</button></div>
+            <div class="peek-card" id="peekCard"></div>
+          </div>
+        </section>
+
+        <section class="view" data-view="search">
+          <div class="screen">
+            <div class="screen-header"><div><h2>주변 가게</h2><p class="subtext">온누리·지역화폐 사용처를 한 번에</p></div><button class="bell">⚙️</button></div>
+            <label class="search" style="box-shadow:none"><span>🔎</span><input id="listSearch" placeholder="예: 삼겹살, 약국, 시장" /></label>
+            <div class="section-title">추천 사용처</div>
+            <div class="store-list" id="storeList"></div>
+          </div>
+        </section>
+
+        <section class="view" data-view="favorites">
+          <div class="screen">
+            <div class="screen-header"><div><h2>즐겨찾기</h2><p class="subtext">다시 찾고 싶은 가게를 모아봤어요</p></div></div>
+            <div class="store-list" id="favoriteList"></div>
+          </div>
+        </section>
+
+        <section class="view" data-view="my">
+          <div class="screen">
+            <div class="screen-header"><div><h2>MY</h2><p class="subtext">상품권과 지역화폐를 관리해요</p></div><button class="bell">⚙️</button></div>
+            <div class="my-hero"><div class="name">병규님 👋</div><div class="small">이번 달 지역화폐 혜택을 확인해보세요.</div></div>
+            <div class="wallet">
+              <div class="wallet-top"><div class="wallet-name">🟢 디지털 온누리상품권</div><button class="refresh">새로고침</button></div>
+              <div class="wallet-balance">128,500원</div><div class="wallet-note">더미 잔액 · 실제 연동 시 제휴 API 필요</div>
+            </div>
+            <div class="wallet">
+              <div class="wallet-top"><div class="wallet-name">🟠 안양사랑페이</div><button class="refresh">새로고침</button></div>
+              <div class="wallet-balance">43,200원</div><div class="wallet-note">더미 잔액 · 경기지역화폐 연동 예정</div>
+            </div>
+            <div class="policy-card">
+              <strong>🎁 이번 달 안양사랑페이 혜택</strong>
+              <div class="policy-grid">
+                <div class="policy-item"><span class="subtext">충전 혜택</span><strong>7%</strong></div>
+                <div class="policy-item"><span class="subtext">월 한도</span><strong>30만원</strong></div>
+              </div>
+            </div>
+            <div class="section-title">내 활동</div>
+            <div class="menu-card">
+              <div class="menu-row"><span>🧾 결제 인증 후기</span><span>›</span></div>
+              <div class="menu-row"><span>❤️ 즐겨찾는 가게</span><span id="favCount">2곳</span></div>
+              <div class="menu-row"><span>📍 최근 본 가게</span><span>›</span></div>
+              <div class="menu-row"><span>🏪 사장님 가게 등록</span><span>›</span></div>
+            </div>
+          </div>
+        </section>
+
+        <nav class="bottom-nav">
+          <button class="nav-btn active" data-target="map"><span>🗺️</span><span>지도</span></button>
+          <button class="nav-btn" data-target="search"><span>🔎</span><span>검색</span></button>
+          <button class="nav-btn" data-target="favorites"><span>❤️</span><span>즐겨찾기</span></button>
+          <button class="nav-btn" data-target="my"><span>👤</span><span>MY</span></button>
+        </nav>
+
+        <div class="overlay" id="overlay">
+          <div class="sheet">
+            <div class="handle"></div>
+            <div id="sheetContent"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const stores = [
+      {id:1,name:'평촌 정육상회',category:'market',categoryLabel:'정육 · 식품',pay:'both',emoji:'🥩',rating:4.8,reviews:38,distance:'320m',x:26,y:31,items:['한우','삼겹살','목살','선물세트'],desc:'평촌 전통시장 안쪽에 있는 정육점입니다. 온누리와 안양사랑페이 모두 사용할 수 있어요.',favorite:true},
+      {id:2,name:'범계 온약국',category:'pharmacy',categoryLabel:'약국',pay:'local',emoji:'💊',rating:4.6,reviews:17,distance:'410m',x:78,y:23,items:['일반의약품','상비약','건강용품'],desc:'범계역 2번 출구 인근 약국. 안양사랑페이 사용 가능 가맹점입니다.',favorite:false},
+      {id:3,name:'안양 손칼국수',category:'food',categoryLabel:'한식 · 면요리',pay:'onnuri',emoji:'🍜',rating:4.7,reviews:52,distance:'560m',x:39,y:48,items:['칼국수','수제비','만두'],desc:'시장 안에서 오래 운영 중인 칼국수집. 디지털 온누리상품권 결제가 가능합니다.',favorite:true},
+      {id:4,name:'우리동네 카페봄',category:'cafe',categoryLabel:'카페 · 디저트',pay:'local',emoji:'☕',rating:4.5,reviews:29,distance:'620m',x:65,y:40,items:['아메리카노','라떼','휘낭시에'],desc:'조용히 쉬어가기 좋은 동네 카페. 안양사랑페이 사용 가능해요.',favorite:false},
+      {id:5,name:'중앙시장 과일집',category:'market',categoryLabel:'과일 · 식품',pay:'both',emoji:'🍎',rating:4.9,reviews:61,distance:'730m',x:20,y:70,items:['사과','복숭아','샤인머스캣','과일바구니'],desc:'제철 과일과 선물용 과일바구니를 판매합니다.',favorite:false},
+      {id:6,name:'평촌 생활마트',category:'mart',categoryLabel:'마트 · 생활',pay:'local',emoji:'🛒',rating:4.3,reviews:15,distance:'820m',x:81,y:66,items:['생필품','과자','음료','세제'],desc:'생활용품과 식료품을 함께 살 수 있는 지역화폐 가맹점입니다.',favorite:false},
+      {id:7,name:'미소헤어',category:'beauty',categoryLabel:'미용실',pay:'local',emoji:'💇',rating:4.8,reviews:43,distance:'940m',x:52,y:76,items:['커트','펌','염색'],desc:'예약 가능한 동네 미용실입니다. 지역화폐 결제 가능.',favorite:false},
+      {id:8,name:'안양철물생활',category:'life',categoryLabel:'생활 · 철물',pay:'onnuri',emoji:'🧰',rating:4.4,reviews:11,distance:'1.1km',x:11,y:51,items:['공구','전구','생활철물','수리용품'],desc:'생활 철물과 간단한 수리용품을 판매합니다.',favorite:false}
+    ];
+
+    const payLabel={onnuri:'온누리',local:'지역화폐',both:'온누리 · 지역화폐'};
+    let payFilter='all', catFilter='all', selectedId=1;
+
+    const markers=document.getElementById('markers');
+    const peekCard=document.getElementById('peekCard');
+    const summaryPill=document.getElementById('summaryPill');
+    const storeList=document.getElementById('storeList');
+    const favoriteList=document.getElementById('favoriteList');
+    const overlay=document.getElementById('overlay');
+    const sheetContent=document.getElementById('sheetContent');
+
+    function visibleStores(){
+      const q=(document.getElementById('searchInput').value||'').trim().toLowerCase();
+      return stores.filter(s=>{
+        const payOk=payFilter==='all'||s.pay===payFilter||(payFilter!=='both'&&s.pay==='both');
+        const catOk=catFilter==='all'||s.category===catFilter;
+        const text=(s.name+' '+s.categoryLabel+' '+s.items.join(' ')).toLowerCase();
+        const qOk=!q||text.includes(q);
+        return payOk&&catOk&&qOk;
+      });
+    }
+
+    function payBadges(s){
+      if(s.pay==='both') return '<span class="badge onnuri">온누리</span><span class="badge local">지역화폐</span>';
+      if(s.pay==='onnuri') return '<span class="badge onnuri">온누리</span>';
+      return '<span class="badge local">지역화폐</span>';
+    }
+
+    function renderMap(){
+      const list=visibleStores();
+      markers.innerHTML=list.map(s=>`<button class="marker ${s.pay}" style="left:${s.x}%;top:${s.y}%" onclick="selectStore(${s.id})"><span class="marker-dot"><span>${s.emoji}</span></span><span class="marker-name">${s.name}</span></button>`).join('');
+      summaryPill.textContent=`주변 사용처 ${list.length}곳`;
+      if(!list.some(s=>s.id===selectedId)) selectedId=list[0]?.id || null;
+      renderPeek();
+    }
+
+    function renderPeek(){
+      const s=stores.find(x=>x.id===selectedId);
+      if(!s){peekCard.innerHTML='<div class="empty" style="padding:20px">조건에 맞는 가게가 없어요.</div>';return}
+      peekCard.innerHTML=`
+        <div class="peek-img">${s.emoji}</div>
+        <div class="peek-info">
+          <h3>${s.name}</h3>
+          <div class="meta"><span>⭐ ${s.rating}</span><span>후기 ${s.reviews}</span><span>${s.distance}</span></div>
+          <div class="badges">${payBadges(s)}</div>
+          <button class="detail-btn" onclick="openDetail(${s.id})">상세보기</button>
+        </div>`;
+    }
+
+    function selectStore(id){selectedId=id;renderPeek()}
+
+    function storeCard(s){
+      return `<div class="store-card" onclick="openDetail(${s.id})">
+        <div class="store-thumb">${s.emoji}</div>
+        <div style="min-width:0;flex:1"><div style="display:flex;align-items:start"><div><h3>${s.name}</h3><div class="meta">${s.categoryLabel} · ${s.distance}</div></div><button class="heart ${s.favorite?'active':''}" onclick="toggleFavorite(event,${s.id})">♥</button></div>
+        <div class="meta" style="margin-top:5px">⭐ ${s.rating} · 후기 ${s.reviews}</div><div class="badges">${payBadges(s)}</div></div>
+      </div>`;
+    }
+
+    function renderLists(){
+      const q=(document.getElementById('listSearch')?.value||'').trim().toLowerCase();
+      const list=stores.filter(s=>(s.name+' '+s.categoryLabel+' '+s.items.join(' ')).toLowerCase().includes(q));
+      storeList.innerHTML=list.map(storeCard).join('')||'<div class="empty">검색 결과가 없어요.</div>';
+      const favs=stores.filter(s=>s.favorite);
+      favoriteList.innerHTML=favs.map(storeCard).join('')||'<div class="empty">즐겨찾는 가게가 아직 없어요.</div>';
+      document.getElementById('favCount').textContent=`${favs.length}곳`;
+    }
+
+    function toggleFavorite(ev,id){
+      ev.stopPropagation();
+      const s=stores.find(x=>x.id===id); s.favorite=!s.favorite; renderLists(); if(document.body.contains(sheetContent)) renderMap();
+    }
+
+    function openDetail(id){
+      const s=stores.find(x=>x.id===id); selectedId=id;
+      sheetContent.innerHTML=`
+        <div class="hero-image">${s.emoji}</div>
+        <div class="sheet-title-row"><div><h2>${s.name}</h2><div class="meta">${s.categoryLabel} · ⭐ ${s.rating} · 후기 ${s.reviews} · ${s.distance}</div></div><button class="close" onclick="closeDetail()">✕</button></div>
+        <div class="badges" style="margin-top:12px">${payBadges(s)}<span class="badge">결제 인증 ${Math.max(3,Math.round(s.reviews*.35))}건</span></div>
+        <div class="action-row"><button class="action">🧭 길찾기</button><button class="action">📞 전화</button><button class="action" onclick="toggleFavoriteFromSheet(${s.id})">${s.favorite?'❤️ 저장됨':'🤍 저장'}</button></div>
+        <div class="info-box"><h4>가게 소개</h4><div style="font-size:13px;line-height:1.6;color:#475467">${s.desc}</div></div>
+        <div class="info-box"><h4>판매 상품</h4><div class="item-tags">${s.items.map(i=>`<span class="item-tag">${i}</span>`).join('')}</div></div>
+        <div class="info-box"><h4>최근 후기</h4>
+          <div class="review"><div class="review-head"><strong>동네주민12</strong><span>2일 전</span></div><div>실제로 결제 잘 됐고 직원분도 친절했어요.</div><div class="verified">✓ 지역화폐 결제 인증</div></div>
+          <div class="review"><div class="review-head"><strong>평촌생활러</strong><span>6일 전</span></div><div>${s.items[0]} 사러 갔는데 생각보다 종류가 많았어요.</div><div class="verified">✓ 방문 인증</div></div>
+        </div>`;
+      overlay.classList.add('show');
+    }
+    function closeDetail(){overlay.classList.remove('show')}
+    function toggleFavoriteFromSheet(id){const s=stores.find(x=>x.id===id);s.favorite=!s.favorite;renderLists();openDetail(id)}
+
+    document.getElementById('payFilters').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;payFilter=b.dataset.pay;document.querySelectorAll('#payFilters .chip').forEach(x=>x.classList.toggle('active',x===b));renderMap()});
+    document.getElementById('categoryFilters').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;catFilter=b.dataset.cat;document.querySelectorAll('#categoryFilters .chip').forEach(x=>x.classList.toggle('active',x===b));renderMap()});
+    document.getElementById('searchInput').addEventListener('input',renderMap);
+    document.getElementById('listSearch').addEventListener('input',renderLists);
+    overlay.addEventListener('click',e=>{if(e.target===overlay)closeDetail()});
+    document.querySelectorAll('.nav-btn').forEach(btn=>btn.addEventListener('click',()=>{
+      document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b===btn));
+      document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.dataset.view===btn.dataset.target));
+      if(btn.dataset.target==='favorites'||btn.dataset.target==='search')renderLists();
+    }));
+
+    renderMap(); renderLists();
+  </script>
+</body>
+</html>
