@@ -43,6 +43,7 @@
 | [03_실행_및_다음단계.md](03_실행_및_다음단계.md) | 빌드/실행 방법 + 우선순위별 다음 개발 항목 |
 | [04_Backend_Phase10.md](04_Backend_Phase10.md) | FastAPI + PostGIS 1차 서버 구축 |
 | [05_Backend_Connect_Phase11.md](05_Backend_Connect_Phase11.md) | iOS ↔ VPS Backend 실 연결 (RemoteMerchantRepository, Date fractional decode) |
+| [06_Backend_Connect_Diagnostic.md](06_Backend_Connect_Diagnostic.md) | 시뮬레이터 0건 이슈 진단·복구 (iOS 26 Simulator loopback sandbox, localhost URL, DEBUG 로그) |
 
 ## 주요 결정 사항 (요약)
 
