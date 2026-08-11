@@ -1,0 +1,64 @@
+# LocalPay Backend — production compose for Hostinger VPS.
+#
+# 격리 원칙 (동일 호스트의 BG Company 서비스와 완전 분리):
+#   - 컨테이너 이름: localpay-api, localpay-db  (기존 서비스와 이름 충돌 없음)
+#   - 네트워크:      localpay_net (전용)
+#   - 볼륨:          localpay_pg_data (전용)
+#   - 포트:          API 는 127.0.0.1:18080 (외부 미노출)
+#                    Postgres 는 컨테이너 네트워크 내부에서만 접근 (호스트 미노출)
+#
+# 절대 금지:
+#   docker compose down -v         # localpay_pg_data 볼륨 삭제 → DB 파괴
+#   docker system prune / volume prune
+#   기존 BG Company 컨테이너/볼륨/네트워크 이름을 참조·수정하는 어떤 조작도 금지.
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: localpay-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - localpay_pg_data:/var/lib/postgresql/data
+    networks:
+      - localpay_net
+    # NO ports:  ← Postgres 는 외부에 노출하지 않는다.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  api:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: localpay-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      ENV: ${ENV:-production}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      SEED_ON_START: ${SEED_ON_START:-true}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      # 호스트의 127.0.0.1:18080 만 매핑. 외부에서 직접 접근 불가.
+      - "127.0.0.1:18080:8000"
+    networks:
+      - localpay_net
+
+networks:
+  localpay_net:
+    name: localpay_net
+    driver: bridge
+
+volumes:
+  localpay_pg_data:
+    name: localpay_pg_data

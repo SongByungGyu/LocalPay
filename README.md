@@ -27,9 +27,19 @@ LocalPay/                        ← 이 저장소 루트
 │   ├── 09_ACCEPTANCE_CHECKLIST.md
 │   └── prototype/index.html     ← HTML 프로토타입
 │
-├── backend/                     ← (예정) FastAPI/NestJS 기반 API 서버
-├── worker/                      ← (예정) 공공데이터 수집기
-├── deploy/                      ← (예정) Docker / VPS 배포
+├── backend/                     ← ⭐ FastAPI + PostgreSQL/PostGIS API 서버 (Phase 10)
+│   ├── app/                     (FastAPI, models, schemas, api/v1, seed)
+│   ├── alembic/                 (async migration, 0001_initial → postgis + tables)
+│   ├── Dockerfile · entrypoint.sh · requirements.txt
+│   └── README.md
+│
+├── deploy/                      ← Docker Compose (VPS 전용)
+│   ├── docker-compose.yml       (localpay-api / localpay-db, 격리 network·volume)
+│   ├── .env.example
+│   └── README.md                (git pull → up -d --build 절차 + 위험 명령 금지)
+│
+├── worker/                      ← (예정 Phase 11) 공공데이터 수집기
+├── docs/                        ← API_SCHEMA.md · DB_SCHEMA.md
 │
 ├── DEVELOPMENT_WORKFLOW.md      ← 회사·집·VPS 공동 작업 규칙
 ├── .gitignore
