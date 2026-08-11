@@ -24,19 +24,35 @@ struct HTTPClient {
     ///   - query: nil 값은 자동으로 제거된다
     func get<T: Decodable>(_ path: String, query: [String: String?] = [:]) async throws -> T {
         let request = try makeRequest(path: path, query: query)
+        #if DEBUG
+        print("[HTTPClient] GET \(request.url?.absoluteString ?? "?")")
+        #endif
 
         let data: Data
         let response: URLResponse
         do {
             (data, response) = try await session.data(for: request)
         } catch {
+            #if DEBUG
+            print("[HTTPClient] ✗ transport error: \(error)")
+            #endif
             throw NetworkError.transport(underlying: error)
         }
 
         guard let http = response as? HTTPURLResponse else {
+            #if DEBUG
+            print("[HTTPClient] ✗ invalid response type")
+            #endif
             throw NetworkError.invalidResponse
         }
+        #if DEBUG
+        print("[HTTPClient] ← HTTP \(http.statusCode) bytes=\(data.count)")
+        #endif
         guard (200..<300).contains(http.statusCode) else {
+            #if DEBUG
+            let bodyPreview = String(data: data.prefix(500), encoding: .utf8) ?? ""
+            print("[HTTPClient] ✗ HTTP \(http.statusCode) body=\(bodyPreview)")
+            #endif
             throw NetworkError.httpStatus(
                 code: http.statusCode,
                 body: String(data: data, encoding: .utf8)
@@ -44,8 +60,19 @@ struct HTTPClient {
         }
 
         do {
-            return try decoder.decode(T.self, from: data)
+            let decoded = try decoder.decode(T.self, from: data)
+            #if DEBUG
+            if let list = decoded as? [Any] {
+                print("[HTTPClient] ✓ decoded \(list.count) items")
+            } else {
+                print("[HTTPClient] ✓ decoded \(T.self)")
+            }
+            #endif
+            return decoded
         } catch {
+            #if DEBUG
+            print("[HTTPClient] ✗ decoding failed: \(error)")
+            #endif
             throw NetworkError.decoding(underlying: error)
         }
     }

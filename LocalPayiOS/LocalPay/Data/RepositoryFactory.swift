@@ -11,9 +11,16 @@ enum RepositoryFactory {
 
     static func makeMerchantRepository() -> MerchantRepository {
         if isRunningInPreview || isRunningInTests {
+            #if DEBUG
+            print("[RepositoryFactory] → DummyMerchantRepository (preview=\(isRunningInPreview) tests=\(isRunningInTests))")
+            #endif
             return DummyMerchantRepository()
         }
-        return RemoteMerchantRepository(baseURL: AppConfiguration.current.apiBaseURL)
+        let base = AppConfiguration.current.apiBaseURL
+        #if DEBUG
+        print("[RepositoryFactory] → RemoteMerchantRepository baseURL=\(base.absoluteString)")
+        #endif
+        return RemoteMerchantRepository(baseURL: base)
     }
 
     // MARK: - Environment detection
@@ -22,7 +29,9 @@ enum RepositoryFactory {
         ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
     }
 
+    /// XCTest 실행 여부. `XCTestConfigurationFilePath` 는 XCTest 러너가 유일하게 세팅하는 env 이므로
+    /// 시뮬레이터 일반 실행에서 XCTest.framework 이 auto-inject 되어도 오판단하지 않는다.
     private static var isRunningInTests: Bool {
-        NSClassFromString("XCTestCase") != nil
+        ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
     }
 }

@@ -84,8 +84,14 @@ final class MapHomeViewModel {
         loadError = nil
         do {
             let result = try await repository.filter(category: categoryFilter, payment: paymentFilter)
+            #if DEBUG
+            print("[MapHomeViewModel] reload ok count=\(result.count) category=\(categoryFilter) payment=\(paymentFilter)")
+            #endif
             visibleMerchants = result
         } catch {
+            #if DEBUG
+            print("[MapHomeViewModel] reload FAILED: \(error)")
+            #endif
             loadError = "가맹점 정보를 불러오지 못했습니다."
             visibleMerchants = []
         }

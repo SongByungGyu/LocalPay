@@ -58,7 +58,6 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         CODE_SIGN_STYLE: Automatic
-        CODE_SIGNING_ALLOWED: NO
 
   LocalPayTests:
     type: bundle.unit-test
@@ -73,4 +72,3 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.localpay.ios.tests
         GENERATE_INFOPLIST_FILE: YES
         CODE_SIGN_STYLE: Automatic
-        CODE_SIGNING_ALLOWED: NO
