@@ -24,7 +24,7 @@ final class MapHomeViewModel {
 
     private let repository: MerchantRepository
 
-    init(repository: MerchantRepository = DummyMerchantRepository()) {
+    init(repository: MerchantRepository = RepositoryFactory.makeMerchantRepository()) {
         self.repository = repository
     }
 

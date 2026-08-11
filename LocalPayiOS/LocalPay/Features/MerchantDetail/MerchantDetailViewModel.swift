@@ -12,7 +12,7 @@ final class MerchantDetailViewModel {
     private let repository: MerchantRepository
     private let merchantId: String
 
-    init(merchantId: String, repository: MerchantRepository = DummyMerchantRepository()) {
+    init(merchantId: String, repository: MerchantRepository = RepositoryFactory.makeMerchantRepository()) {
         self.merchantId = merchantId
         self.repository = repository
     }

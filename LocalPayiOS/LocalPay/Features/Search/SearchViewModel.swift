@@ -15,7 +15,7 @@ final class SearchViewModel {
     private let repository: MerchantRepository
     private var currentTask: Task<Void, Never>?
 
-    init(repository: MerchantRepository = DummyMerchantRepository()) {
+    init(repository: MerchantRepository = RepositoryFactory.makeMerchantRepository()) {
         self.repository = repository
     }
 

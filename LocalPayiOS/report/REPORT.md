@@ -41,6 +41,8 @@
 | [01_구현_현황.md](01_구현_현황.md) | Phase 1~9 각 단계 완성 내용과 화면별 기능 |
 | [02_아키텍처_및_교체지점.md](02_아키텍처_및_교체지점.md) | 계층 구조, Kakao Map · Backend · Wallet 교체 지점 |
 | [03_실행_및_다음단계.md](03_실행_및_다음단계.md) | 빌드/실행 방법 + 우선순위별 다음 개발 항목 |
+| [04_Backend_Phase10.md](04_Backend_Phase10.md) | FastAPI + PostGIS 1차 서버 구축 |
+| [05_Backend_Connect_Phase11.md](05_Backend_Connect_Phase11.md) | iOS ↔ VPS Backend 실 연결 (RemoteMerchantRepository, Date fractional decode) |
 
 ## 주요 결정 사항 (요약)
 

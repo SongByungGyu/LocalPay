@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		052045C902959B5D516E04BB /* MerchantDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45474678C8A46DE0348753E1 /* MerchantDetailView.swift */; };
+		0E29AF2AE30B73E8FA8D8434 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D53B63F36B9E9CE4D086AFAB /* HTTPClient.swift */; };
 		0F8D918428458612F571CE51 /* DateHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D7B45239E666A499F9729F6 /* DateHelper.swift */; };
 		16884451E348BEA31D20A49F /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 115B7420A5114D10E1C1F0ED /* RootTabView.swift */; };
 		1733B8213E3DD755F120F668 /* MerchantRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C61BF0421CD47D2EB367902 /* MerchantRepository.swift */; };
@@ -28,11 +29,15 @@
 		574E7792F868035AB89D5FE8 /* DummyMerchantSeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0F3E03D9E28EB098757F3A3 /* DummyMerchantSeed.swift */; };
 		5B734CCE957CD53345CE0B12 /* PaymentBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = C31C3A512C163CFF55663ED1 /* PaymentBadge.swift */; };
 		5CFD168D526EC3DE340E1BEA /* CategoryChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B1807F1A40DCC8CB2362D4 /* CategoryChip.swift */; };
+		5E2E0A34CFC3A062EC3C9371 /* RemoteMerchantRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ECBC33D028B09B5224C9DBC /* RemoteMerchantRepository.swift */; };
+		65009C2DBE99B50EDFDAFA2E /* NetworkError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4A1304DCE13F3FB06D74735 /* NetworkError.swift */; };
 		752845E2EF988434B0A74EEC /* PaymentVerification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89803490B98C9F6780C60317 /* PaymentVerification.swift */; };
 		7AF1591EC4E4B3AE0F6EE79B /* AppSearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A72BA3517B5838E2FC36FEEA /* AppSearchBar.swift */; };
 		7E75A8182F291686AFB94C8D /* ReviewsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BDC0066249BE8A8AC61AED5 /* ReviewsStore.swift */; };
 		834A91A2F85C04698EDBBEDD /* BusinessHours.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31388827C7841F43F242AF5B /* BusinessHours.swift */; };
+		91CF8F28D2C297E353AF7EE2 /* AppConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D9E8FC53F4641FD4DB5E2B /* AppConfiguration.swift */; };
 		97083A9B3D628884675C4D4E /* FavoriteToggleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 870ED13AA3A8E21FDCDFF29E /* FavoriteToggleButton.swift */; };
+		9A6AB027719B5495C589B0FC /* RemoteMerchantRepositoryDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11FB7378880141525DA5690C /* RemoteMerchantRepositoryDecodingTests.swift */; };
 		9C1E3AFF46B96BD7DBADC620 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F39BC9B4E3761A6721E1B4A8 /* SearchViewModel.swift */; };
 		A0B8678906D9C1B4E95DEDFF /* LocalPayApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5561F3E0A610962D1F6AAE2 /* LocalPayApp.swift */; };
 		A243AEF0109484B4086CA366 /* BalanceCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71B877D92957D75C658A6A65 /* BalanceCard.swift */; };
@@ -42,6 +47,7 @@
 		B98D3C41E52475B9642A68CF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 92BEA8A6E4CEF37DED464806 /* Assets.xcassets */; };
 		BAC093EDA48EFC2326640A36 /* MerchantCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B1D295E4FDB3CD1E083F788 /* MerchantCard.swift */; };
 		BD7DA1DBB88A48B1E4B2E747 /* MerchantDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71615212964BF23EC5502F84 /* MerchantDetailViewModel.swift */; };
+		BE77DE9B48E1A3CB2E6163F5 /* RepositoryFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F848C147187F519E7DC268 /* RepositoryFactory.swift */; };
 		C14F1612C000FE0A6E259A6F /* ProductChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 448A298FF0260E7CEDD83258 /* ProductChip.swift */; };
 		C39AC9B3C426CE028F73A938 /* RatingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51CD176026CCDFEF2E94D1C /* RatingView.swift */; };
 		C6AC947388E69CBD8BA3B882 /* DummyMerchantRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E2630E8ED427F3A73B24F95 /* DummyMerchantRepository.swift */; };
@@ -49,6 +55,7 @@
 		CD41C1BF8BE675A39A197C82 /* MerchantPreviewCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E24D65B63137A4AD5A6406 /* MerchantPreviewCard.swift */; };
 		D39AC225CF3EB9CB4AF23697 /* PaymentBadgeStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CE24CD163933F028CF61589 /* PaymentBadgeStyle.swift */; };
 		D41EE641310BA51252294B63 /* MyPageHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654987321052079D525DD9EB /* MyPageHomeView.swift */; };
+		DE4849AFC51678BFFC52C431 /* JSONDecoder+LocalPay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A12196EEB6BDAFA9364A47A /* JSONDecoder+LocalPay.swift */; };
 		DF6E562B3D3FDF50369E3902 /* SortOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92334CCFA05AFF12F5FF0730 /* SortOption.swift */; };
 		E1ADF73133B988E9C3A79175 /* MapRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FAE534AC61281B393332E7E /* MapRegion.swift */; };
 		E4AB2E5C2F8B50B520B4D23D /* CurrencyPolicyCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22D0B00C819063A43AC52DE /* CurrencyPolicyCard.swift */; };
@@ -60,18 +67,32 @@
 		FA7A980FB4E304E540749098 /* DistanceFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1877690F43A4FC0422759FD /* DistanceFormatter.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		DB58DCA9386C446319D34752 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E7FB6EBEEFDCBCAB8CDF4791 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D0E4F6048CB9E7CFFC52818E;
+			remoteInfo = LocalPay;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		0BDC0066249BE8A8AC61AED5 /* ReviewsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewsStore.swift; sourceTree = "<group>"; };
 		0D7B45239E666A499F9729F6 /* DateHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateHelper.swift; sourceTree = "<group>"; };
 		0E290140BF6DC2273DBAB74B /* Merchant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Merchant.swift; sourceTree = "<group>"; };
 		115B7420A5114D10E1C1F0ED /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
+		11FB7378880141525DA5690C /* RemoteMerchantRepositoryDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteMerchantRepositoryDecodingTests.swift; sourceTree = "<group>"; };
+		19CA13A7A0E104B08EFAC6E3 /* LocalPayTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LocalPayTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C61BF0421CD47D2EB367902 /* MerchantRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantRepository.swift; sourceTree = "<group>"; };
+		20D9E8FC53F4641FD4DB5E2B /* AppConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfiguration.swift; sourceTree = "<group>"; };
 		24E24D65B63137A4AD5A6406 /* MerchantPreviewCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantPreviewCard.swift; sourceTree = "<group>"; };
 		27DAB2911843715F1B7BEDAA /* FloatingLocationButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingLocationButton.swift; sourceTree = "<group>"; };
 		2FAE534AC61281B393332E7E /* MapRegion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapRegion.swift; sourceTree = "<group>"; };
 		31388827C7841F43F242AF5B /* BusinessHours.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BusinessHours.swift; sourceTree = "<group>"; };
 		351699257B615F169CE0FE18 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		3E9BB1FA40509063012428CC /* PaymentFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentFilter.swift; sourceTree = "<group>"; };
+		3ECBC33D028B09B5224C9DBC /* RemoteMerchantRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteMerchantRepository.swift; sourceTree = "<group>"; };
 		43AEA649870C526F31676DE4 /* MapHomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapHomeViewModel.swift; sourceTree = "<group>"; };
 		448A298FF0260E7CEDD83258 /* ProductChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductChip.swift; sourceTree = "<group>"; };
 		45474678C8A46DE0348753E1 /* MerchantDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantDetailView.swift; sourceTree = "<group>"; };
@@ -86,11 +107,13 @@
 		7E2630E8ED427F3A73B24F95 /* DummyMerchantRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DummyMerchantRepository.swift; sourceTree = "<group>"; };
 		870ED13AA3A8E21FDCDFF29E /* FavoriteToggleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteToggleButton.swift; sourceTree = "<group>"; };
 		89803490B98C9F6780C60317 /* PaymentVerification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentVerification.swift; sourceTree = "<group>"; };
+		89F848C147187F519E7DC268 /* RepositoryFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryFactory.swift; sourceTree = "<group>"; };
 		90791852508DF4084F262ABC /* FavoritesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesStore.swift; sourceTree = "<group>"; };
 		92334CCFA05AFF12F5FF0730 /* SortOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortOption.swift; sourceTree = "<group>"; };
 		928F443F86391DC42ECD9C1C /* FavoritesHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesHomeView.swift; sourceTree = "<group>"; };
 		92BEA8A6E4CEF37DED464806 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97AD0F9DD010007A43AF7974 /* GeoDistance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeoDistance.swift; sourceTree = "<group>"; };
+		9A12196EEB6BDAFA9364A47A /* JSONDecoder+LocalPay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSONDecoder+LocalPay.swift"; sourceTree = "<group>"; };
 		A1877690F43A4FC0422759FD /* DistanceFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistanceFormatter.swift; sourceTree = "<group>"; };
 		A51CD176026CCDFEF2E94D1C /* RatingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RatingView.swift; sourceTree = "<group>"; };
 		A5561F3E0A610962D1F6AAE2 /* LocalPayApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalPayApp.swift; sourceTree = "<group>"; };
@@ -110,6 +133,8 @@
 		CCE36DFC310F72591F7112E4 /* LocalPay.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = LocalPay.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D298D0F2480FF5F6DFD975E8 /* AppColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColor.swift; sourceTree = "<group>"; };
 		D317B81B40CB76EA0C706BEE /* MerchantCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantCategory.swift; sourceTree = "<group>"; };
+		D4A1304DCE13F3FB06D74735 /* NetworkError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkError.swift; sourceTree = "<group>"; };
+		D53B63F36B9E9CE4D086AFAB /* HTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPClient.swift; sourceTree = "<group>"; };
 		DB6DA134BA47D4F204311F0D /* ReviewComposerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewComposerView.swift; sourceTree = "<group>"; };
 		E409A4646135961AEB0AC474 /* MerchantMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantMarker.swift; sourceTree = "<group>"; };
 		E5B1807F1A40DCC8CB2362D4 /* CategoryChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryChip.swift; sourceTree = "<group>"; };
@@ -139,6 +164,17 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		217E83A764D8E2A20E4F59E5 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				20D9E8FC53F4641FD4DB5E2B /* AppConfiguration.swift */,
+				D53B63F36B9E9CE4D086AFAB /* HTTPClient.swift */,
+				9A12196EEB6BDAFA9364A47A /* JSONDecoder+LocalPay.swift */,
+				D4A1304DCE13F3FB06D74735 /* NetworkError.swift */,
+			);
+			path = Network;
+			sourceTree = "<group>";
+		};
 		36A64AB2BBD66EB01850197D /* MyPage */ = {
 			isa = PBXGroup;
 			children = (
@@ -152,7 +188,9 @@
 		3AF1AF0C4F66DE435F1E68A0 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				89F848C147187F519E7DC268 /* RepositoryFactory.swift */,
 				C2F72FD8BC98C69CBF0B7729 /* Dummy */,
+				217E83A764D8E2A20E4F59E5 /* Network */,
 				BD747F0D2FBECF8FE2B3F731 /* Repository */,
 			);
 			path = Data;
@@ -171,6 +209,7 @@
 			isa = PBXGroup;
 			children = (
 				E8925BBE392034384B9E2E5A /* LocalPay */,
+				92E7CE11847CE3BCC299F020 /* LocalPayTests */,
 				6B0C94C4E3D38597DE206A2D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -210,6 +249,7 @@
 			isa = PBXGroup;
 			children = (
 				CCE36DFC310F72591F7112E4 /* LocalPay.app */,
+				19CA13A7A0E104B08EFAC6E3 /* LocalPayTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -221,6 +261,14 @@
 				71615212964BF23EC5502F84 /* MerchantDetailViewModel.swift */,
 			);
 			path = MerchantDetail;
+			sourceTree = "<group>";
+		};
+		92E7CE11847CE3BCC299F020 /* LocalPayTests */ = {
+			isa = PBXGroup;
+			children = (
+				11FB7378880141525DA5690C /* RemoteMerchantRepositoryDecodingTests.swift */,
+			);
+			path = LocalPayTests;
 			sourceTree = "<group>";
 		};
 		A8B9A57E849D405C353D1C57 /* App */ = {
@@ -257,6 +305,7 @@
 			isa = PBXGroup;
 			children = (
 				1C61BF0421CD47D2EB367902 /* MerchantRepository.swift */,
+				3ECBC33D028B09B5224C9DBC /* RemoteMerchantRepository.swift */,
 			);
 			path = Repository;
 			sourceTree = "<group>";
@@ -323,6 +372,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		92932B5006EF407E32AD80EF /* LocalPayTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D4196F3CC824327B437B66EC /* Build configuration list for PBXNativeTarget "LocalPayTests" */;
+			buildPhases = (
+				FD98EE29F6AB23B3A933C88D /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C96B4AD0110118A4D300F566 /* PBXTargetDependency */,
+			);
+			name = LocalPayTests;
+			packageProductDependencies = (
+			);
+			productName = LocalPayTests;
+			productReference = 19CA13A7A0E104B08EFAC6E3 /* LocalPayTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		D0E4F6048CB9E7CFFC52818E /* LocalPay */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = CEC37B4B7F4461425907E4D2 /* Build configuration list for PBXNativeTarget "LocalPay" */;
@@ -350,6 +417,9 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
+					92932B5006EF407E32AD80EF = {
+						ProvisioningStyle = Automatic;
+					};
 					D0E4F6048CB9E7CFFC52818E = {
 						ProvisioningStyle = Automatic;
 					};
@@ -370,6 +440,7 @@
 			projectRoot = "";
 			targets = (
 				D0E4F6048CB9E7CFFC52818E /* LocalPay */,
+				92932B5006EF407E32AD80EF /* LocalPayTests */,
 			);
 		};
 /* End PBXProject section */
@@ -391,6 +462,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				360B4AB2CE83736C6269CF9A /* AppColor.swift in Sources */,
+				91CF8F28D2C297E353AF7EE2 /* AppConfiguration.swift in Sources */,
 				7AF1591EC4E4B3AE0F6EE79B /* AppSearchBar.swift in Sources */,
 				AFDB0D0175A04002BCF40C70 /* AppSpacing.swift in Sources */,
 				1E604062E9053EDC08B407CC /* AppTypography.swift in Sources */,
@@ -408,6 +480,8 @@
 				4EE858088D85E531FEC5B6CA /* FavoritesStore.swift in Sources */,
 				56ABA6FD48546DF601412DEA /* FloatingLocationButton.swift in Sources */,
 				3FF04F8DE79B3E2116D61DE2 /* GeoDistance.swift in Sources */,
+				0E29AF2AE30B73E8FA8D8434 /* HTTPClient.swift in Sources */,
+				DE4849AFC51678BFFC52C431 /* JSONDecoder+LocalPay.swift in Sources */,
 				A0B8678906D9C1B4E95DEDFF /* LocalPayApp.swift in Sources */,
 				C92E808D1B4AE24ECF4696A7 /* LocationService.swift in Sources */,
 				EDB7FAE27040BD1A6E5CFD66 /* MapHomeView.swift in Sources */,
@@ -422,6 +496,7 @@
 				CD41C1BF8BE675A39A197C82 /* MerchantPreviewCard.swift in Sources */,
 				1733B8213E3DD755F120F668 /* MerchantRepository.swift in Sources */,
 				D41EE641310BA51252294B63 /* MyPageHomeView.swift in Sources */,
+				65009C2DBE99B50EDFDAFA2E /* NetworkError.swift in Sources */,
 				5B734CCE957CD53345CE0B12 /* PaymentBadge.swift in Sources */,
 				D39AC225CF3EB9CB4AF23697 /* PaymentBadgeStyle.swift in Sources */,
 				1A26BD2BA68C3086681E965D /* PaymentFilter.swift in Sources */,
@@ -431,6 +506,8 @@
 				2C84A341073F4EE6049D765C /* PhaseOnePlaceholder.swift in Sources */,
 				C14F1612C000FE0A6E259A6F /* ProductChip.swift in Sources */,
 				C39AC9B3C426CE028F73A938 /* RatingView.swift in Sources */,
+				5E2E0A34CFC3A062EC3C9371 /* RemoteMerchantRepository.swift in Sources */,
+				BE77DE9B48E1A3CB2E6163F5 /* RepositoryFactory.swift in Sources */,
 				F0E2A9015BA0BCD11EA692B0 /* Review.swift in Sources */,
 				54E3D4FFDE671C4672062D89 /* ReviewCard.swift in Sources */,
 				F9463982589253FCEA1DDFF2 /* ReviewComposerView.swift in Sources */,
@@ -443,7 +520,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FD98EE29F6AB23B3A933C88D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9A6AB027719B5495C589B0FC /* RemoteMerchantRepositoryDecodingTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C96B4AD0110118A4D300F566 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D0E4F6048CB9E7CFFC52818E /* LocalPay */;
+			targetProxy = DB58DCA9386C446319D34752 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		16CE344FD81D03BB570ADA90 /* Release */ = {
@@ -467,6 +560,26 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
+		};
+		87B8CD5B9642A14464F305BA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.localpay.ios.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LocalPay.app/LocalPay";
+			};
+			name = Debug;
 		};
 		AB69313463A339A1A037641F /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -613,6 +726,26 @@
 			};
 			name = Debug;
 		};
+		BDB0A10F44BFE5DAD1CC5411 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.localpay.ios.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LocalPay.app/LocalPay";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -630,6 +763,15 @@
 			buildConfigurations = (
 				AB69313463A339A1A037641F /* Debug */,
 				16CE344FD81D03BB570ADA90 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D4196F3CC824327B437B66EC /* Build configuration list for PBXNativeTarget "LocalPayTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				87B8CD5B9642A14464F305BA /* Debug */,
+				BDB0A10F44BFE5DAD1CC5411 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
