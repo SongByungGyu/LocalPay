@@ -68,9 +68,11 @@ async def test_search_rejects_invalid_category(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_openapi_lists_new_endpoint(client: AsyncClient) -> None:
-    r = await client.get("/openapi.json")
-    assert r.status_code == 200
-    paths = r.json()["paths"]
-    assert "/api/v1/search" in paths
-    assert "/api/v1/merchants/map" in paths
+async def test_map_bbox_validates_east_west_order(client: AsyncClient) -> None:
+    # east <= west
+    r = await client.get(
+        "/api/v1/merchants/map",
+        params={"north": 37.5, "south": 37.0, "east": 127.0, "west": 127.5},
+    )
+    assert r.status_code == 400
+    assert "east" in r.json()["detail"]

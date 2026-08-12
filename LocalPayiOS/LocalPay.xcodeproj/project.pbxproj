@@ -130,7 +130,7 @@
 		C8D366557EE1B3D6FB1A8451 /* MapHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapHomeView.swift; sourceTree = "<group>"; };
 		C8EA89AE3386B4882D5F67FA /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		CB51044792CF7F25AA64F913 /* SectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeader.swift; sourceTree = "<group>"; };
-		CCE36DFC310F72591F7112E4 /* LocalPay.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = LocalPay.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CCE36DFC310F72591F7112E4 /* LocalPay.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LocalPay.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D298D0F2480FF5F6DFD975E8 /* AppColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColor.swift; sourceTree = "<group>"; };
 		D317B81B40CB76EA0C706BEE /* MerchantCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantCategory.swift; sourceTree = "<group>"; };
 		D4A1304DCE13F3FB06D74735 /* NetworkError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkError.swift; sourceTree = "<group>"; };
@@ -547,6 +547,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = T7JJUZE2YE;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LocalPay/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -587,6 +588,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = T7JJUZE2YE;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LocalPay/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
