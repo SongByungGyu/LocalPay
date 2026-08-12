@@ -96,8 +96,23 @@ struct MapHomeView: View {
             }
             .navigationBarHidden(true)
             .task {
-                await viewModel.loadInitial()
+                // 최초 진입: 안양 fallback 영역의 BBOX 로 즉시 로딩.
+                // 이후 사용자 카메라 이동은 onMapCameraChange 가 debounce+cancel 로 처리.
+                await viewModel.loadInitial(bbox: MapRegion.anyangDefault.bbox)
                 locationService.requestWhenInUse()
+            }
+            .onMapCameraChange(frequency: .onEnd) { context in
+                // MKCoordinateRegion → 도메인 중립 MapBBox 로 변환해 ViewModel 에 전달.
+                // ViewModel 이 400ms debounce + 이전 Task cancel + 유사 BBOX 스킵 + generation
+                // race 방지까지 담당하므로 View 는 그대로 전달만 한다.
+                let r = context.region
+                let bbox = MapBBox(
+                    north: r.center.latitude + r.span.latitudeDelta / 2,
+                    south: r.center.latitude - r.span.latitudeDelta / 2,
+                    east: r.center.longitude + r.span.longitudeDelta / 2,
+                    west: r.center.longitude - r.span.longitudeDelta / 2
+                )
+                viewModel.onCameraChanged(bbox: bbox)
             }
             .onChange(of: viewModel.paymentFilter) { _, _ in
                 Task { await viewModel.onFilterChanged() }

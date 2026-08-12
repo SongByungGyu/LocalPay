@@ -1,11 +1,11 @@
 import CoreLocation
 import Foundation
 
-/// LocalPay Backend v1 (`/api/v1/merchants*`) 을 호출하는 실 Repository.
-/// - Backend 응답 JSON 은 iOS `Merchant` 모델과 1:1 매핑 (docs/API_SCHEMA.md 참조).
-/// - `search` 는 서버에 아직 endpoint 가 없어(현재 Phase) `fetchAll()` 결과를
-///   `DummyMerchantRepository` 와 동일한 규칙으로 로컬 필터링한다.
-///   Phase 11 서버 검색 API 가 열리면 이 부분만 교체하면 된다.
+/// LocalPay Backend v1 (`/api/v1/…`) 을 호출하는 실 Repository.
+/// - 응답 JSON 은 iOS `Merchant` 모델과 1:1 매핑 (docs/API_SCHEMA.md).
+/// - `search` 는 Phase 13-B 부터 서버 `/api/v1/search` 를 직접 사용한다
+///   (기존 fetchAll → 로컬 필터 방식 폐기).
+/// - `mapMerchants` 는 Phase 13-A 지도 BBOX 조회.
 final class RemoteMerchantRepository: MerchantRepository {
 
     private let client: HTTPClient
@@ -33,17 +33,15 @@ final class RemoteMerchantRepository: MerchantRepository {
     }
 
     func search(query: String) async throws -> [Merchant] {
-        let all = try await fetchAll()
-        let q = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !q.isEmpty else { return all }
-
-        return all.filter { merchant in
-            if merchant.name.lowercased().contains(q) { return true }
-            if let market = merchant.marketName?.lowercased(), market.contains(q) { return true }
-            if merchant.category.title.lowercased().contains(q) { return true }
-            if merchant.products.contains(where: { $0.lowercased().contains(q) }) { return true }
-            return false
-        }
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !q.isEmpty else { return [] }
+        return try await client.get(
+            "/api/v1/search",
+            query: [
+                "q": q,
+                "limit": "100"
+            ]
+        )
     }
 
     func nearby(center: CLLocationCoordinate2D, radiusMeters: Double) async throws -> [Merchant] {
@@ -62,6 +60,25 @@ final class RemoteMerchantRepository: MerchantRepository {
         try await client.get(
             "/api/v1/merchants",
             query: [
+                "category": category == .all ? nil : category.rawValue,
+                "payment": payment.rawValue,
+                "limit": "1000"
+            ]
+        )
+    }
+
+    func mapMerchants(
+        bbox: MapBBox,
+        category: MerchantCategory,
+        payment: PaymentFilter
+    ) async throws -> [Merchant] {
+        try await client.get(
+            "/api/v1/merchants/map",
+            query: [
+                "north": String(bbox.north),
+                "south": String(bbox.south),
+                "east": String(bbox.east),
+                "west": String(bbox.west),
                 "category": category == .all ? nil : category.rawValue,
                 "payment": payment.rawValue,
                 "limit": "1000"

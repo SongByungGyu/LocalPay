@@ -51,6 +51,21 @@ final class DummyMerchantRepository: MerchantRepository {
         }
     }
 
+    func mapMerchants(
+        bbox: MapBBox,
+        category: MerchantCategory,
+        payment: PaymentFilter
+    ) async throws -> [Merchant] {
+        merchants.filter { m in
+            m.latitude >= bbox.south
+                && m.latitude <= bbox.north
+                && m.longitude >= bbox.west
+                && m.longitude <= bbox.east
+                && matches(category: category, in: m)
+                && matches(payment: payment, in: m)
+        }
+    }
+
     // MARK: - Private
 
     private func matches(category: MerchantCategory, in m: Merchant) -> Bool {

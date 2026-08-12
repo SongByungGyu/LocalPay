@@ -33,6 +33,15 @@ struct HTTPClient {
         do {
             (data, response) = try await session.data(for: request)
         } catch {
+            // URLSession task 가 `Task.cancel()` 로 취소된 경우.
+            // 이건 정상 취소지 오류가 아니므로 Swift-native CancellationError 로 변환해
+            // 호출부의 `catch is CancellationError` 로 조용히 걸리도록 한다.
+            if let urlErr = error as? URLError, urlErr.code == .cancelled {
+                #if DEBUG
+                print("[HTTPClient] cancelled: \(request.url?.absoluteString ?? "?")")
+                #endif
+                throw CancellationError()
+            }
             #if DEBUG
             print("[HTTPClient] ✗ transport error: \(error)")
             #endif
