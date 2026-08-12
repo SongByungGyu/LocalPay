@@ -1,0 +1,97 @@
+[
+  {
+    "frcsNo": "TEST-0001",
+    "frcsNm": "  안양중앙시장 행복정육점 ",
+    "frcsTelNo": "031-441-1101",
+    "frcsAddr": "경기 안양시 만안구 만안로 232 안양중앙시장 내",
+    "frcsRoadNmAddr": "경기 안양시 만안구 만안로 232",
+    "frcsLa": 37.3946,
+    "frcsLo": 126.9235,
+    "bzsttNm": "정상영업",
+    "indutyCd": "47211",
+    "usePlcRegnCd": "41171"
+  },
+  {
+    "frcsNo": "TEST-0002",
+    "frcsNm": "평촌우리약국",
+    "frcsTelNo": "0313876789",
+    "frcsAddr": "경기 안양시 동안구 평촌대로 145",
+    "frcsLa": 37.3893,
+    "frcsLo": 126.9812,
+    "bzsttNm": "정상영업",
+    "indutyCd": "47811",
+    "usePlcRegnCd": "41173"
+  },
+  {
+    "frcsNo": "TEST-0003",
+    "frcsNm": "안양착한카페",
+    "frcsTelNo": "",
+    "frcsAddr": "경기 안양시 동안구 시민대로 250",
+    "frcsLa": 37.3956,
+    "frcsLo": 126.9573,
+    "bzsttNm": "정상영업",
+    "indutyCd": "56220",
+    "usePlcRegnCd": "41173"
+  },
+  {
+    "frcsNo": "TEST-0004",
+    "frcsNm": "범계할머니칼국수",
+    "frcsTelNo": "031-386-2211",
+    "frcsAddr": "경기 안양시 동안구 관양로 88",
+    "frcsLa": 37.3901,
+    "frcsLo": 126.9887,
+    "bzsttNm": "정상영업",
+    "indutyCd": "56111",
+    "usePlcRegnCd": "41173"
+  },
+  {
+    "frcsNo": "TEST-0005",
+    "frcsNm": "지점없는집",
+    "frcsTelNo": "031-000-0000",
+    "frcsAddr": "경기 안양시 만안구 어딘가",
+    "frcsLa": 0.0,
+    "frcsLo": 0.0,
+    "bzsttNm": "휴업",
+    "indutyCd": "56220",
+    "usePlcRegnCd": "41171"
+  },
+  {
+    "frcsNo": "TEST-0006",
+    "frcsNm": "좌표없는가게",
+    "frcsTelNo": "031-000-1111",
+    "frcsAddr": "경기 안양시 만안구 안양로 100",
+    "bzsttNm": "정상영업",
+    "indutyCd": "96112",
+    "usePlcRegnCd": "41171"
+  },
+  {
+    "frcsNo": "TEST-0007",
+    "frcsNm": "잘못된좌표가게",
+    "frcsTelNo": "0311234567",
+    "frcsAddr": "경기 안양시 동안구 어디로 50",
+    "frcsLa": 200.0,
+    "frcsLo": 500.0,
+    "bzsttNm": "정상영업",
+    "indutyCd": "47812",
+    "usePlcRegnCd": "41173"
+  },
+  {
+    "frcsNo": "TEST-0008",
+    "frcsNm": "빈이름테스트",
+    "frcsAddr": "경기 안양시 동안구 시민대로 10",
+    "frcsLa": 37.4,
+    "frcsLo": 126.95,
+    "indutyCd": "99999",
+    "usePlcRegnCd": "41173"
+  },
+  {
+    "frcsNo": "TEST-0009",
+    "frcsNm": "",
+    "frcsAddr": "경기 안양시 만안구 어디로 99",
+    "frcsLa": 37.395,
+    "frcsLo": 126.923,
+    "bzsttNm": "정상영업",
+    "indutyCd": "56220",
+    "usePlcRegnCd": "41171"
+  }
+]
