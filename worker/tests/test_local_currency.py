@@ -208,6 +208,18 @@ def test_extract_items_single_item_as_dict():
     assert items == [{"frcsNm": "solo"}]
 
 
+def test_client_normalizes_url_encoded_service_key():
+    """공공데이터포털 Encoding/Decoding 어느 걸 넣어도 canonical (decoded) 로 보관.
+    이중 인코딩 방지."""
+    from worker.importers.local_currency.client import LocalCurrencyApiClient
+    encoded = "abcd%2Befg%3D%3D"     # 사용자가 Encoding 값을 넣은 케이스
+    decoded = "abcd+efg=="            # canonical
+    c1 = LocalCurrencyApiClient(service_key=encoded)
+    c2 = LocalCurrencyApiClient(service_key=decoded)
+    assert c1._service_key == decoded
+    assert c2._service_key == decoded
+
+
 def test_extract_items_items_as_list_directly():
     body = {
         "response": {

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any, Dict, Iterator, List, Optional
+from urllib.parse import unquote
 
 from worker.core.http_client import ExternalApiError, ExternalHttpClient
 
@@ -42,7 +43,14 @@ class LocalCurrencyApiClient:
     def __init__(self, service_key: str, http: Optional[ExternalHttpClient] = None):
         if not service_key:
             raise ValueError("service_key must not be empty")
-        self._service_key = service_key
+        # 공공데이터포털은 인증키를 두 가지로 제공한다:
+        #   - Encoding: URL 인코딩 (예: `abc%2B==` 처럼 %2B, %3D 등 포함)
+        #   - Decoding: 원본 (예: `abc+==`)
+        # httpx 는 params 를 자동으로 URL 인코딩하므로, 사용자가 Encoding 값을 넣으면
+        # 이중 인코딩되어 SERVICE_KEY_IS_NOT_REGISTERED_ERROR 를 유발한다.
+        # 어느 쪽이든 넣어도 동작하도록 여기서 한 번 decode 해 canonical (raw) 형태로 정규화.
+        # 이미 decoded 상태라면 unquote 는 no-op.
+        self._service_key = unquote(service_key)
         self._http = http or ExternalHttpClient()
 
     def fetch_region(
