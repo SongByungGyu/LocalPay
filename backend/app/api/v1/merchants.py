@@ -30,6 +30,11 @@ MAX_LIMIT = 1000
 DEFAULT_NEARBY_RADIUS_M = 3000
 MAX_NEARBY_RADIUS_M = 30_000
 
+# 지도 BBOX 상한 (도 단위, WGS84).
+# 대략 남한 전체가 위도 ~4°, 경도 ~5° 안에 들어간다. 사용자가 전세계 zoom-out 상태로
+# 요청해 수십만 건을 한꺼번에 반환하는 상황을 방지한다. 초과 시 400.
+MAX_BBOX_DEGREES = 6.0
+
 
 def _load_options():
     """Ensure related rows are batch-loaded, not lazy per row."""
@@ -158,6 +163,12 @@ async def map_merchants(
         raise HTTPException(status_code=400, detail="north must be greater than south")
     if east <= west:
         raise HTTPException(status_code=400, detail="east must be greater than west")
+    # 지구 전체나 대륙 단위 zoom-out 요청 방지. 남한 전체보다 큰 BBOX 는 거부.
+    if (north - south) > MAX_BBOX_DEGREES or (east - west) > MAX_BBOX_DEGREES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"bbox too large (max {MAX_BBOX_DEGREES}°)",
+        )
     if category and category not in VALID_CATEGORIES:
         raise HTTPException(status_code=400, detail=f"invalid category: {category}")
     if payment not in VALID_PAYMENT_FILTERS:
