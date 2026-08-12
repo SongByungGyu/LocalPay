@@ -50,9 +50,22 @@ services:
         condition: service_healthy
     ports:
       # 호스트의 127.0.0.1:18080 만 매핑. 외부에서 직접 접근 불가.
+      # HTTPS 는 아래 Traefik 라벨을 통해 :443 에서 서비스한다.
+      # 이 포트는 개발용 SSH 터널·로컬 curl 검증용으로 유지.
       - "127.0.0.1:18080:8000"
     networks:
       - localpay_net
+    # 기존 VPS Traefik(v3, host mode, Docker provider, letsencrypt HTTP-01)
+    # 을 그대로 재사용해 https://localpay.bgcompanyoffice.cloud 로 노출.
+    # 기존 BG Company / Hermes 라우터·인증서에는 영향 없음
+    # (별도 router 이름 · 별도 도메인 · 별도 인증서).
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.localpay-api.entrypoints=websecure"
+      - "traefik.http.routers.localpay-api.rule=Host(`localpay.bgcompanyoffice.cloud`)"
+      - "traefik.http.routers.localpay-api.tls=true"
+      - "traefik.http.routers.localpay-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.localpay-api.loadbalancer.server.port=8000"
 
 networks:
   localpay_net:

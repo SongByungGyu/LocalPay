@@ -109,15 +109,59 @@ docker compose restart               # 전체 (DB 포함)
 
 `restart` 는 볼륨과 이미지를 건드리지 않는다.
 
-## 외부 노출 (선택)
+## 외부 노출 — HTTPS (Phase 12 부터)
 
-현재 API 는 `127.0.0.1:18080` 에만 바인딩되어 외부에서 접근할 수 없다.
-외부 도메인으로 노출하려면 별도의 리버스 프록시(Nginx/Traefik) 에서 `http://127.0.0.1:18080` 을 upstream 으로 두는 것을 권장한다 (BG Company Traefik 을 재구성하지 않고 별도 config 로).
+`https://localpay.bgcompanyoffice.cloud` 로 공개.
 
-Phase 10 검증 단계에서는 SSH 터널만으로 충분:
+라우팅 구조:
+```
+iPhone / Simulator
+        │
+        ↓ HTTPS 443
+        │
+Traefik (기존, host mode, Docker provider, Let's Encrypt HTTP-01)
+        │
+        ↓ 컨테이너 IP:8000
+        │
+localpay-api  →  localpay-db (localpay_net 내부, 외부 미노출)
+```
+
+Traefik 자체 설정 파일 (`/docker/traefik/docker-compose.yml`) 은 **수정하지 않는다.**
+이 compose 파일의 `api` 서비스에 붙은 라벨만으로 라우팅된다:
+
+```yaml
+labels:
+  - "traefik.enable=true"
+  - "traefik.http.routers.localpay-api.entrypoints=websecure"
+  - "traefik.http.routers.localpay-api.rule=Host(`localpay.bgcompanyoffice.cloud`)"
+  - "traefik.http.routers.localpay-api.tls=true"
+  - "traefik.http.routers.localpay-api.tls.certresolver=letsencrypt"
+  - "traefik.http.services.localpay-api.loadbalancer.server.port=8000"
+```
+
+`127.0.0.1:18080` 바인딩은 개발용 로컬 curl · 필요 시 SSH 터널용으로 유지.
+
+### HTTPS 검증
 
 ```bash
-# Mac 에서
-ssh -L 18080:127.0.0.1:18080 <vps-user>@<vps-host>
-# 이후 Mac 브라우저에서 http://127.0.0.1:18080/health
+# 어디서든 (SSH 터널 없이도)
+curl -sS https://localpay.bgcompanyoffice.cloud/health
+# {"status":"ok","service":"localpay-backend","version":"0.1.0"}
+
+# HTTP → HTTPS 자동 redirect
+curl -sI http://localpay.bgcompanyoffice.cloud/health   # → 308
 ```
+
+인증서 갱신은 Traefik 이 자동 처리 (`traefik_traefik-letsencrypt` volume 에 저장). 재시작 없이 갱신됨.
+
+### 롤백 (LocalPay 라우터만 제거)
+
+```bash
+cd /opt/localpay
+git log --oneline deploy/docker-compose.yml   # 라벨 추가 커밋 확인
+git revert <해당 커밋>
+cd deploy && docker compose up -d api
+# → LocalPay HTTPS 라우팅만 사라지고 BG Company / Hermes 는 영향 0
+```
+
+자세한 배포·트러블슈팅은 `docs/HTTPS_DEPLOYMENT.md` 참조.

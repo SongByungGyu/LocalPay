@@ -1,9 +1,11 @@
 import Foundation
 
-/// Backend API 접속 설정. 빌드 구성(DEBUG / Release) 별로 Base URL 을 분리한다.
+/// Backend API 접속 설정. Phase 12 부터 HTTPS 실 도메인 하나로 통합.
 ///
-/// DEBUG: 회사 Mac 에서 여는 SSH 터널(`ssh -N -L 18080:127.0.0.1:18080 …`) 로 VPS 백엔드에 접속한다.
-/// Release: 실 서비스 도메인이 발급되면 아래 URL 만 교체하면 된다.
+/// 실 도메인: `https://localpay.bgcompanyoffice.cloud`
+/// 라우팅: VPS Traefik(v3, host mode, Docker provider, Let's Encrypt HTTP-01)
+///        → localpay-api:8000 → FastAPI + PostgreSQL/PostGIS
+/// SSH 터널 · 로컬 백엔드가 필요하지 않다.
 struct AppConfiguration {
 
     /// 실제 iOS 앱이 호출할 REST Base URL. `/api/v1/...` 경로가 이 뒤에 붙는다.
@@ -11,18 +13,16 @@ struct AppConfiguration {
 
     /// 앱 전역에서 참조하는 현재 구성. `.current` 하나만 사용한다.
     ///
-    /// - DEBUG 에서 host 를 `localhost` 로 쓰는 이유: SSH 터널이 IPv6 `[::1]` 에만 bind 되는 경우가 있어
-    ///   `127.0.0.1` 문자열이 URL 에 박히면 iOS URLSession 이 IPv4 만 시도하다 `Connection refused` 로 실패한다.
-    ///   `localhost` 는 시스템 resolver 가 IPv4/IPv6 둘 다 반환하므로 Happy Eyeballs 가 성공한 쪽을 쓴다.
+    /// DEBUG · Release 모두 실 운영 HTTPS 엔드포인트를 사용한다 (Phase 12).
+    /// 이유:
+    /// - SSH 터널 없이 실기기·시뮬레이터 어디서든 동작
+    /// - iOS 26 시뮬레이터의 host loopback sandbox 이슈 회피
+    /// - Wi-Fi/LTE 어느 네트워크에서도 동일 동작
+    /// 실 개발 DB 는 아직 Dummy Seed (25개) 로만 채워져 있으므로 프로덕션 격리 문제 없음.
+    /// 별도 개발 백엔드가 필요해지면 그때 DEBUG 분기를 다시 추가.
     static let current: AppConfiguration = {
-        #if DEBUG
         return AppConfiguration(
-            apiBaseURL: URL(string: "http://localhost:18080")!
+            apiBaseURL: URL(string: "https://localpay.bgcompanyoffice.cloud")!
         )
-        #else
-        return AppConfiguration(
-            apiBaseURL: URL(string: "https://api.localpay.example.com")!
-        )
-        #endif
     }()
 }

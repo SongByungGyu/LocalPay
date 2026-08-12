@@ -44,6 +44,7 @@
 | [04_Backend_Phase10.md](04_Backend_Phase10.md) | FastAPI + PostGIS 1차 서버 구축 |
 | [05_Backend_Connect_Phase11.md](05_Backend_Connect_Phase11.md) | iOS ↔ VPS Backend 실 연결 (RemoteMerchantRepository, Date fractional decode) |
 | [06_Backend_Connect_Diagnostic.md](06_Backend_Connect_Diagnostic.md) | 시뮬레이터 0건 이슈 진단·복구 (iOS 26 Simulator loopback sandbox, localhost URL, DEBUG 로그) |
+| [07_HTTPS_Phase12.md](07_HTTPS_Phase12.md) | Phase 12 — Traefik + Let's Encrypt 로 HTTPS 공개, SSH 터널 없이 실기기·시뮬레이터 접속 |
 
 ## 주요 결정 사항 (요약)
 
