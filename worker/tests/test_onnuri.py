@@ -101,15 +101,23 @@ def test_split_products_comma_and_slash():
     assert _split_products("커피, 커피, 브런치") == ["커피", "브런치"]
 
 
-@pytest.mark.parametrize("sido,sigungu,full,expected", [
-    ("경기도", "안양시", "경기도 안양시 만안구 만안로 232", "manan"),
-    ("경기도", "안양시", "경기도 안양시 동안구 시민대로 250", "dongan"),
-    ("경기도", "안양시", "경기도 안양시 안양로", "unknown"),
-    ("서울특별시", "중구", "서울특별시 중구 세종대로", None),
-    ("부산광역시", "수영구", "부산광역시 수영구", None),
+@pytest.mark.parametrize("sido,sigungu,full,market,expected", [
+    # 주소 기반 (fallback) — 시군구 상세 있을 때
+    ("경기도", "안양시", "경기도 안양시 만안구 만안로 232", None, "manan"),
+    ("경기도", "안양시", "경기도 안양시 동안구 시민대로 250", None, "dongan"),
+    ("경기도", "안양시", "경기도 안양시 안양로", None, "unknown"),
+    ("서울특별시", "중구", "서울특별시 중구 세종대로", None, None),
+    ("부산광역시", "수영구", "부산광역시 수영구", None, None),
+    # 시장명 기반 (2025-07-31 CSV 스펙에서 주소가 시도만 있는 경우)
+    ("경기", None, "경기", "안양중앙시장", "manan"),
+    ("경기", None, "경기", "안양남부시장", "manan"),
+    ("경기", None, "경기", "안양관양시장", "dongan"),
+    ("경기", None, "경기", "평촌1번가 상점가", "dongan"),
+    ("경기", None, "경기", "안양미지의시장", "unknown"),   # "안양" 포함이지만 매핑 미상
+    ("서울", None, "서울", "명동상점가", None),
 ])
-def test_classify_anyang(sido, sigungu, full, expected):
-    assert _classify_anyang(sido, sigungu, full) == expected
+def test_classify_anyang(sido, sigungu, full, market, expected):
+    assert _classify_anyang(sido, sigungu, full, market_name=market) == expected
 
 
 # ---------- normalizer.normalize ----------
@@ -142,13 +150,15 @@ def test_normalize_valid_anyang_manan():
     n = normalize(r)
     assert n is not None
     assert n.merchant_name_normalized == "안양중앙시장 행복정육점"
-    assert n.market_name_normalized == "안양중앙시장"
+    assert n.market_name_normalized == "안양중앙시장"      # 시장명은 affiliation 정보로 보존
     assert n.supports_paper is True
     assert n.supports_digital is True
     assert n.supports_onnuri is True
     assert n.products == ["돼지고기", "한우", "선물세트"]
-    assert n.mapped_category == "market"     # 시장명 힌트 최우선
-    assert n.category_source == "market_name"
+    # 스펙 §결정 2 — market_name 이 category 를 덮지 않음.
+    # 정육점 은 products=[돼지고기, 한우] → food.
+    assert n.mapped_category == "food"
+    assert n.category_source == "product_keyword"
     assert n.registration_year == 2019
     assert n.anyang_district == "manan"
     assert n.coordinate_valid is False       # 온누리 원본은 좌표 없음
@@ -185,8 +195,24 @@ def test_normalize_non_anyang_is_none_district():
 
 # ---------- category mapper ----------
 
-def test_category_mapper_market_name_priority():
-    assert map_category(market_name="안양중앙시장", products=[])[0] == "market"
+def test_category_mapper_market_name_ignored():
+    """스펙 §결정 2: marketName 은 category 결정에서 제외."""
+    # 시장에 속했더라도 products 로 판단.
+    cat, src = map_category(
+        market_name="안양중앙시장", products=["돼지고기", "한우"], merchant_name="행복정육점"
+    )
+    assert cat == "food"
+    assert src == "product_keyword"
+    # products 도 없으면 name 으로.
+    cat, src = map_category(
+        market_name="안양중앙시장", products=[], merchant_name="평촌수약국"
+    )
+    assert cat == "pharmacy"
+    assert src == "name_keyword"
+    # products/name 다 매칭 없으면 etc — 시장명 있어도 market 로 분류되지 않음.
+    cat, src = map_category(market_name="안양중앙시장", products=[], merchant_name="이름없음가게")
+    assert cat == DEFAULT_CATEGORY
+    assert src == "default"
 
 
 @pytest.mark.parametrize("products,expected", [
@@ -196,11 +222,27 @@ def test_category_mapper_market_name_priority():
     (["쌀", "채소"], "food"),
     (["세탁"], "life"),
     (["칼국수"], "restaurant"),
+    (["짬뽕"], "restaurant"),
+    (["미용"], "beauty"),
+    (["케이크", "음료"], "cafe"),           # 케이크 → cafe (베이커리 계열)
+    (["약품"], "pharmacy"),
     (["잡화"], DEFAULT_CATEGORY),
     ([], DEFAULT_CATEGORY),
 ])
 def test_category_mapper_products(products, expected):
-    cat, _src = map_category(market_name=None, products=products)
+    cat, _src = map_category(products=products)
+    assert cat == expected
+
+
+@pytest.mark.parametrize("name,expected", [
+    ("평촌수약국", "pharmacy"),
+    ("스타벅스", DEFAULT_CATEGORY),           # 카페 키워드 없음. products 없으면 default.
+    ("카페디어디디", "cafe"),
+    ("살롱드니즈", "beauty"),
+    ("이름없음", DEFAULT_CATEGORY),
+])
+def test_category_mapper_name_fallback(name, expected):
+    cat, _src = map_category(products=[], merchant_name=name)
     assert cat == expected
 
 
@@ -212,11 +254,15 @@ def test_dry_run_produces_anyang_stats_only():
     assert report.source_rows == 13
     # 안양 지역만 anyang_total 로 카운트. 서울/부산은 제외.
     assert report.anyang_total >= 8
-    # 최소한 만안 3+, 동안 3+, unknown 0+ (fixture 상)
-    assert report.anyang_manan >= 3
-    assert report.anyang_dongan >= 3
+    # 새 로직: 시장명 기반 매칭 우선.
+    #   fixture 상 "안양중앙시장" 매핑 = manan, 나머지 미지의 시장은 unknown.
+    #   주소 기반 fallback 은 상세 시군구 있는 경우만.
+    assert report.anyang_manan + report.anyang_dongan + report.anyang_unknown >= 8
+    assert report.anyang_dongan >= 3    # 동안구 상세 주소 기반 fallback
     # 좌표는 온누리 원본에 없음 → 모두 geocode 필요.
     assert report.coord_valid == 0
     assert report.geocode_required == report.anyang_total
-    # 카테고리 매핑 최소 1개 이상 market 로 분류 (안양중앙시장).
-    assert report.category_counts.get("market", 0) >= 1
+    # 스펙 §결정 2 — marketName 은 category 결정 제외.
+    # 시장 소속이라도 products 로 판단하므로 market 카테고리 자체가 등장하지 않을 수 있음.
+    # 대신 product_keyword 로 매핑된 항목이 존재해야 함.
+    assert report.category_source_counts.get("product_keyword", 0) >= 1

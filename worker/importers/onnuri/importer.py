@@ -51,7 +51,13 @@ class DryRunReport:
     coord_missing: int = 0
     geocode_required: int = 0
 
+    # 각기 별개 기준으로 계산. 자동 merge 는 하지 않고 후보 개수만 보고 (Gate 4 처리).
     duplicate_name_candidates: int = 0
+    duplicate_address_candidates: int = 0
+    duplicate_name_and_address_candidates: int = 0
+
+    # 전국 좌표 부재 예상 (안양과 별개, 전국 통계용).
+    nationwide_geocode_required_estimate: int = 0
 
     sample_merchants: List[Dict[str, Any]] = field(default_factory=list)
 
@@ -101,7 +107,12 @@ class DryRunReport:
         L.append(f"  valid={self.coord_valid}  missing={self.coord_missing}")
         L.append(f"  geocode_required={self.geocode_required}")
         L.append("")
-        L.append(f"[Potential duplicate names]={self.duplicate_name_candidates}")
+        L.append("[Potential duplicates — 안양 내부]")
+        L.append(f"  name exact                = {self.duplicate_name_candidates}")
+        L.append(f"  address exact             = {self.duplicate_address_candidates}")
+        L.append(f"  name+address exact        = {self.duplicate_name_and_address_candidates}")
+        L.append("")
+        L.append(f"[전국 좌표 부재 예상]  ~ {self.nationwide_geocode_required_estimate}")
         L.append("")
         L.append("[Sample Anyang Merchants]")
         for i, m in enumerate(self.sample_merchants, 1):
@@ -217,11 +228,26 @@ def run_dry_run(
             report.coord_missing += 1
             report.geocode_required += 1
 
-    # potential duplicate: normalized_name 이 같은 항목이 2건 이상.
+    # Potential duplicate 3종 (자동 merge 는 하지 않음, Gate 4 처리):
+    #  - name exact:         정규화 상호명 동일
+    #  - address exact:      정규화 주소 동일
+    #  - name+address exact: 둘 다 동일 (가장 강한 후보)
     name_buckets: Dict[str, int] = defaultdict(int)
+    addr_buckets: Dict[str, int] = defaultdict(int)
+    both_buckets: Dict[str, int] = defaultdict(int)
     for n in anyang_records:
         name_buckets[n.merchant_name_normalized] += 1
+        addr_buckets[n.address_normalized] += 1
+        both_buckets[f"{n.merchant_name_normalized}|{n.address_normalized}"] += 1
     report.duplicate_name_candidates = sum(1 for c in name_buckets.values() if c >= 2)
+    report.duplicate_address_candidates = sum(1 for c in addr_buckets.values() if c >= 2)
+    report.duplicate_name_and_address_candidates = sum(
+        1 for c in both_buckets.values() if c >= 2
+    )
+
+    # 전국 좌표 부재 예상 = source_rows (온누리 원본은 위경도 컬럼 자체가 없음).
+    # header 확인 결과에서 좌표 컬럼이 없으면 전 record 가 pending.
+    report.nationwide_geocode_required_estimate = report.source_rows
 
     # 최대 20건 sample.
     for n in anyang_records[:20]:
