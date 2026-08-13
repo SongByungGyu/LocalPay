@@ -4,7 +4,10 @@
 - 지류/디지털 여부: 'Y'/'N'/'O'/'X'/'있음'/'없음' 등 관대하게 파싱 → bool
 - 등록년도: int 로 변환 시도, 실패 시 None
 - 취급품목: 콤마/슬래시/파이프 기준 split, 각 항목 trim, 최대 20개
-- 안양 필터: 주소 앞부분에 "안양시" 포함 + 만안/동안 분류
+- 안양 필터: 2025-07-31 공식 CSV 는 소재지 컬럼이 시도(예: "경기") 만 담기 때문에
+  주소 기반으로는 시군구를 판별할 수 없다. 대신 소속 시장명에 "안양" 이 포함되거나
+  알려진 안양 소재 시장/상점가 이름이면 anyang 으로 분류한다.
+  향후 상세 주소 포함 데이터셋으로 바뀌면 주소 기반 fallback 을 우선한다.
 - 카테고리: market_name/products 키워드 기반 매핑, 불확실 → etc
 - 좌표: 원본에 없음 → 항상 None + geocode_status="pending"
 """
@@ -35,10 +38,11 @@ def normalize(raw: RawOnnuriRecord) -> Optional[NormalizedOnnuriRecord]:
     market_norm = _clean_ws(raw.market_name)
     products = _split_products(raw.products_raw)
     sido, sigungu = _split_address_head(addr_norm)
-    anyang_district = _classify_anyang(sido, sigungu, addr_norm)
+    anyang_district = _classify_anyang(sido, sigungu, addr_norm, market_name=market_norm)
+    # marketName 은 category 결정에서 제외 (스펙 §결정 2). affiliation 정보로만 보존.
     mapped_cat, cat_src = map_category(
-        market_name=market_norm,
         products=products,
+        merchant_name=name_norm,
     )
 
     return NormalizedOnnuriRecord(
@@ -130,19 +134,59 @@ def _split_address_head(addr: str) -> Tuple[Optional[str], Optional[str]]:
     return sido, sigungu
 
 
+# 알려진 안양 소재 시장/상점가 이름 (2025-07-31 스냅샷 관측 + 안양시 공식 정보).
+# 이름 정규화 (whitespace collapse) 후 exact 비교.
+# 만안(M) / 동안(D) 분류는 시장 위치에 따라 매핑.
+# 확실치 않으면 "unknown" 으로 두고 자동 배정하지 않는다.
+ANYANG_MARKETS: dict[str, str] = {
+    # 만안구
+    "안양중앙시장": "manan",
+    "안양중앙인정시장": "manan",
+    "안양중앙지하도상가": "manan",
+    "안양남부시장": "manan",
+    "안양1번가 상점가": "manan",
+    "안양일번가 지하쇼핑몰": "manan",
+    "안양아크로상가골목형상점가": "manan",
+    "안양가구상점가": "manan",
+    "안양농수산물 골목형상점가": "manan",
+    "안양육동시장": "manan",
+    # 동안구
+    "안양관양시장": "dongan",
+    "평촌1번가 상점가": "dongan",
+}
+
+
 def _classify_anyang(
-    sido: Optional[str], sigungu: Optional[str], full_addr: str
+    sido: Optional[str],
+    sigungu: Optional[str],
+    full_addr: str,
+    market_name: Optional[str] = None,
 ) -> Optional[str]:
-    """안양시 여부와 만안구/동안구 분류."""
-    if not (sido and ("경기" in sido)):
-        # 경기도 아닌데 '안양시' 문자열 우연히 있어도 우리 안양 필터 대상 X.
-        return None
-    if not sigungu or "안양시" not in sigungu:
-        return None
-    # 만안구/동안구는 주소 전체 문자열에서 탐색 (sigungu 는 '안양시' 만일 수 있음).
-    if "만안구" in full_addr:
-        return "manan"
-    if "동안구" in full_addr:
-        return "dongan"
-    # 안양시는 맞지만 구 미명시 → 만안 기본값 대신 unknown (안전).
-    return "unknown"
+    """안양시 여부와 만안구/동안구 분류.
+
+    2025-07-31 온누리 CSV 는 주소가 시도(예: '경기') 만 담고 시군구가 없어
+    주소 기반 매칭이 불가능하다. 대신 소속 시장명 기반 매칭을 우선한다.
+
+    반환값:
+        "manan" / "dongan" / "unknown" / None
+        - manan/dongan: 알려진 안양 시장에 매칭
+        - unknown: 시장명에 "안양" 포함되지만 구 매핑 사전에 없음
+        - None: 안양 아님
+    """
+    # 1) 시장명 기반 판정 (2025-07-31 스냅샷 이후 이 방법이 실용적).
+    if market_name:
+        mkt = market_name.strip()
+        if mkt in ANYANG_MARKETS:
+            return ANYANG_MARKETS[mkt]
+        if "안양" in mkt:
+            return "unknown"
+
+    # 2) 주소 기반 fallback (향후 상세 주소 포함 데이터셋 대비).
+    if sido and ("경기" in sido) and sigungu and "안양시" in sigungu:
+        if "만안구" in full_addr:
+            return "manan"
+        if "동안구" in full_addr:
+            return "dongan"
+        return "unknown"
+
+    return None

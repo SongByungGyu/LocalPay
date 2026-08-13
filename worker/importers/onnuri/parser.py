@@ -57,17 +57,32 @@ class FileInfo:
 
 
 def detect_encoding(path: Path) -> str:
-    """작은 청크를 여러 encoding 으로 디코드 시도해 첫 성공을 반환."""
+    """BOM 우선 검사 후 여러 encoding 으로 sample decode 시도.
+
+    주의: sample decode 로만 판단하면 UTF-8 파일의 4KB 경계에서 multi-byte
+    문자가 잘려 UnicodeDecodeError 가 나고 cp949 로 잘못 fallback 될 수 있다.
+    → BOM (`EF BB BF`) 이 있으면 무조건 utf-8-sig 확정.
+    """
     with path.open("rb") as f:
-        sample = f.read(4096)
-    candidates = ("utf-8-sig", "utf-8", "cp949", "euc-kr")
-    for enc in candidates:
+        head4 = f.read(4)
+    if head4[:3] == b"\xef\xbb\xbf":
+        return "utf-8-sig"
+    if head4[:2] in (b"\xff\xfe", b"\xfe\xff"):
+        return "utf-16"
+
+    # BOM 없으면 sample 로 시도. 잘림 방지 위해 sample 을 크게.
+    with path.open("rb") as f:
+        sample = f.read(65536)
+    # UTF-8 시도 시 partial multi-byte 잘림을 관용적으로 판정.
+    for enc in ("utf-8", "cp949", "euc-kr"):
         try:
             sample.decode(enc)
             return enc
-        except UnicodeDecodeError:
+        except UnicodeDecodeError as e:
+            # UTF-8 후보인데 sample 마지막 몇 바이트에서만 잘렸다면 UTF-8 확정.
+            if enc == "utf-8" and e.end >= len(sample) - 4:
+                return "utf-8"
             continue
-    # 최후 fallback — cp949 (KOMSCO CSV 통상적).
     return "cp949"
 
 
