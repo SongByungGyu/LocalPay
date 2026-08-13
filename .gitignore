@@ -93,3 +93,10 @@ LocalPay_Claude_Handoff.zip
 # Logs
 *.log
 logs/
+
+# 공공데이터 원본 스냅샷 (대용량, 저작권상 재배포 지양)
+# 로컬 개발용은 data/import/ 아래에 두고 git 제외.
+data/import/
+onnuri_*.csv
+소상공인시장진흥공단_*.csv
+소상공인시장진흥공단_*.xlsx

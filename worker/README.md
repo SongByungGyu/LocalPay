@@ -2,7 +2,7 @@
 
 LocalPay 실 데이터 수집·정규화·병합 파이썬 워커.
 
-## 구조 (Phase 13 Gate 2-A 기준)
+## 구조 (Phase 13 Gate 3-A 기준)
 
 ```
 worker/
@@ -10,15 +10,16 @@ worker/
 │   ├── config.py          Env 로드. Service Key masking
 │   └── http_client.py     Timeout/retry/backoff + secret URL masking
 ├── importers/
-│   └── local_currency/
-│       ├── client.py            KOMSCO 통합 API (Dataset 15119539) 호출
-│       ├── parser.py            응답 → RawLocalCurrencyRecord (관대한 field alias)
-│       ├── normalizer.py        Raw → Normalized (name/phone/addr/coord)
-│       ├── category_mapper.py   KSIC → LocalPay MerchantCategory
-│       ├── models.py            RawRecord / NormalizedRecord 데이터 클래스
-│       └── importer.py          Dry-run 오케스트레이션 · Quality Report
+│   ├── local_currency/    (Gate 2-A) KOMSCO 통합 API — 지역필터 미확인 BLOCKED
+│   │   └── docs/LOCAL_CURRENCY_API_BLOCKER.md 참조
+│   └── onnuri/            (Gate 3-A) 소상공인시장진흥공단 CSV snapshot
+│       ├── parser.py            CSV streaming + encoding 자동 (utf-8-sig / cp949 / euc-kr)
+│       ├── normalizer.py        Raw → Normalized (name/addr/products/Y-N/year/anyang district)
+│       ├── category_mapper.py   market_name/products 키워드 → LocalPay category
+│       ├── importer.py          Dry-run 오케스트레이션 · Quality Report
+│       └── models.py            RawOnnuriRecord / NormalizedOnnuriRecord
 ├── cli.py                 python -m worker.cli ... entry point
-└── tests/                 pytest (DB 불필요)
+└── tests/                 pytest (DB 불필요). 83 tests
 ```
 
 ## 원칙
@@ -63,6 +64,30 @@ python3 -m worker.cli local-currency \
 - `anyang-dongan` — 41173
 
 `--dry-run` 은 **필수 옵션**. 이번 Gate 는 어떤 DB write 도 하지 않는다.
+
+## 온누리 사용법 (Gate 3-A)
+
+원본 CSV 는 사용자가 공공데이터포털 [Dataset 3060079](https://www.data.go.kr/data/3060079/fileData.do) 에서 다운로드해 다음 위치에 둔다 (git 제외):
+
+```
+data/import/onnuri/소상공인시장진흥공단_전국 온누리상품권 가맹점 현황_20250731.csv
+```
+
+```bash
+python -m worker.cli onnuri \
+  --file "data/import/onnuri/소상공인시장진흥공단_전국 온누리상품권 가맹점 현황_20250731.csv" \
+  --region anyang \
+  --dry-run
+```
+
+옵션:
+- `--file` (필수) — CSV 경로
+- `--region anyang` (Gate 3-A 는 안양만)
+- `--limit N` — 안양 record 상한 (디버깅용)
+- `--encoding cp949` — CSV encoding 강제 (미지정 시 자동)
+- `--dry-run` (필수) — Production DB 무변경 보장
+
+**참고**: 온누리 원본은 위경도가 없어 모든 매장이 `geocode_status=pending`. Kakao Local 등 좌표 보정은 별도 Gate 에서 결정.
 
 ## Gate 2-B 이후 확장 계획 (사용자 승인 후)
 

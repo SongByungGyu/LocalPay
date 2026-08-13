@@ -1,9 +1,13 @@
 """Worker CLI entry point.
 
 사용법:
+    # 지역화폐 (Gate 2-A, BLOCKED — docs/LOCAL_CURRENCY_API_BLOCKER.md 참조)
     python -m worker.cli local-currency --region anyang --limit 100 --dry-run
-    python -m worker.cli local-currency --region anyang-manan --limit 200 --dry-run
     python -m worker.cli local-currency --region anyang --fixture fixture.json --dry-run
+
+    # 온누리 (Gate 3-A)
+    python -m worker.cli onnuri --file /path/to/온누리_20250731.csv --region anyang --dry-run
+    python -m worker.cli onnuri --file /path/to/file.csv --region anyang --limit 500 --dry-run
 
 --dry-run 은 이번 Gate 의 유일한 실행 모드. Production DB 에 어떤 쓰기도 없다.
 """
@@ -15,7 +19,8 @@ from pathlib import Path
 
 from worker.core.config import load_config
 from worker.importers.local_currency.client import REGION_CODES
-from worker.importers.local_currency.importer import run_dry_run
+from worker.importers.local_currency.importer import run_dry_run as run_local_currency_dry_run
+from worker.importers.onnuri.importer import run_dry_run as run_onnuri_dry_run
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -45,13 +50,62 @@ def main(argv: list[str] | None = None) -> int:
         help="필수. Gate 2-A 는 dry-run 만 허용. DB 에 어떤 쓰기도 발생하지 않는다.",
     )
 
+    p_onnuri = sub.add_parser(
+        "onnuri",
+        help="소상공인시장진흥공단 전국 온누리상품권 가맹점 (Dataset 3060079)",
+    )
+    p_onnuri.add_argument("--file", required=True, type=Path, help="공식 CSV 파일 경로")
+    p_onnuri.add_argument(
+        "--region",
+        default="anyang",
+        choices=["anyang"],
+        help="Gate 3-A 는 안양만 지원 (스펙 §14)",
+    )
+    p_onnuri.add_argument("--limit", type=int, default=None, help="안양 record 상한 (개발/디버깅용)")
+    p_onnuri.add_argument("--encoding", default=None, help="CSV encoding 강제 (미지정 시 자동)")
+    p_onnuri.add_argument(
+        "--dry-run",
+        action="store_true",
+        required=True,
+        help="필수. Gate 3-A 는 dry-run 만 허용. DB 에 어떤 쓰기도 발생하지 않는다.",
+    )
+
     args = parser.parse_args(argv)
 
     if args.command == "local-currency":
         return _cmd_local_currency(args)
+    if args.command == "onnuri":
+        return _cmd_onnuri(args)
 
     parser.print_help()
     return 2
+
+
+def _cmd_onnuri(args: argparse.Namespace) -> int:
+    if not args.dry_run:
+        print("ERROR: --dry-run 필수. Gate 3-A 는 실제 write 를 하지 않는다.", file=sys.stderr)
+        return 2
+    if not args.file.is_file():
+        print(f"ERROR: file not found: {args.file}", file=sys.stderr)
+        return 2
+
+    print(f"[cfg] onnuri dry-run: file={args.file} region={args.region} limit={args.limit}")
+
+    try:
+        report = run_onnuri_dry_run(
+            file_path=args.file,
+            region=args.region,
+            limit=args.limit,
+        )
+    except Exception as e:  # noqa: BLE001
+        print(f"[error] onnuri dry-run failed: {e}", file=sys.stderr)
+        return 1
+
+    print()
+    print(report.as_text())
+    print()
+    print("[gate] Gate 3-A dry-run 완료. Production DB 에는 어떤 쓰기도 발생하지 않았다.")
+    return 0
 
 
 def _cmd_local_currency(args: argparse.Namespace) -> int:
@@ -84,7 +138,7 @@ def _cmd_local_currency(args: argparse.Namespace) -> int:
     exit_code = 0
     for r in regions:
         try:
-            report = run_dry_run(
+            report = run_local_currency_dry_run(
                 service_key=cfg.data_go_kr_service_key or "",
                 region=r,
                 max_records=args.limit,

@@ -47,6 +47,7 @@
 | [07_HTTPS_Phase12.md](07_HTTPS_Phase12.md) | Phase 12 — Traefik + Let's Encrypt 로 HTTPS 공개, SSH 터널 없이 실기기·시뮬레이터 접속 |
 | [08_Phase13_Gate1_BBOX_Search.md](08_Phase13_Gate1_BBOX_Search.md) | Phase 13 Gate 1 — 지도 BBOX 자동 로딩 (debounce/cancel/race) + 서버 /api/v1/search |
 | [09_Phase13_Gate2A.md](09_Phase13_Gate2A.md) | Phase 13 Gate 2-A — 지역화폐 통합 API 파이프라인 (worker/), fixture dry-run, DB 무변경, Service Key 대기 |
+| [10_Phase13_Gate3A.md](10_Phase13_Gate3A.md) | Phase 13 Gate 3-A — 온누리 CSV 파이프라인 (안양 필터·카테고리·좌표 부재 통계), Gate 2 BLOCKED 문서화, DB 무변경 |
 
 ## 주요 결정 사항 (요약)
 
