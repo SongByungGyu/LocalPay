@@ -75,6 +75,12 @@ class Merchant(Base):
     source_id: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
+    # Phase 13 Gate 3-B2 — 좌표 신뢰도 메타데이터 (docs/LOCATION_PRECISION.md).
+    # 온누리 raw 는 market_centroid_manual/market_dataset, dummy 는 dummy_seed 등.
+    location_source: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
+    location_precision: Mapped[Optional[str]] = mapped_column(String(16), nullable=True)
+    location_confidence: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

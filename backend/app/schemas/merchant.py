@@ -64,5 +64,11 @@ class MerchantOut(CamelModel):
     description: Optional[str] = None
     last_verified_at: Optional[datetime] = None
 
+    # Phase 13 Gate 3-B2 — 좌표 신뢰도 메타데이터.
+    # iOS 는 이 필드로 개별 매장 마커 vs 시장 대표 마커 렌더링 분기 (docs/MAP_UX_TODO.md).
+    location_source: Optional[str] = None
+    location_precision: Optional[str] = None
+    location_confidence: Optional[float] = None
+
     reviews: List[ReviewOut] = []
     recent_payments: List[PaymentVerificationOut] = []
