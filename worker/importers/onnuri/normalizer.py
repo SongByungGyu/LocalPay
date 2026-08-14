@@ -17,6 +17,7 @@ import re
 import unicodedata
 from typing import List, Optional, Tuple
 
+from worker.importers.onnuri.anyang_markets import ANYANG_MARKET_COORDS, lookup_market
 from worker.importers.onnuri.category_mapper import map_category
 from worker.importers.onnuri.models import NormalizedOnnuriRecord, RawOnnuriRecord
 
@@ -39,6 +40,20 @@ def normalize(raw: RawOnnuriRecord) -> Optional[NormalizedOnnuriRecord]:
     products = _split_products(raw.products_raw)
     sido, sigungu = _split_address_head(addr_norm)
     anyang_district = _classify_anyang(sido, sigungu, addr_norm, market_name=market_norm)
+
+    # 시장 좌표 사전 lookup (안양 sample 용). 매핑 실패 시 좌표 없음 유지.
+    market_coord = lookup_market(market_norm)
+    if market_coord is not None:
+        lat, lng, coord_district = market_coord
+        coord_valid = True
+        geocode_status = "resolved_market"
+        # 사전 district 값이 있으면 이걸로 정정 (더 정확).
+        if not anyang_district or anyang_district == "unknown":
+            anyang_district = coord_district
+    else:
+        lat, lng = None, None
+        coord_valid = False
+        geocode_status = "pending"
     # marketName 은 category 결정에서 제외 (스펙 §결정 2). affiliation 정보로만 보존.
     mapped_cat, cat_src = map_category(
         products=products,
@@ -52,6 +67,10 @@ def normalize(raw: RawOnnuriRecord) -> Optional[NormalizedOnnuriRecord]:
         market_name_normalized=market_norm,
         address=raw.address or "",
         address_normalized=addr_norm,
+        latitude=lat,
+        longitude=lng,
+        coordinate_valid=coord_valid,
+        geocode_status=geocode_status,
         supports_paper=_parse_yn(raw.supports_paper_raw),
         supports_digital=_parse_yn(raw.supports_digital_raw),
         supports_onnuri=True,
@@ -134,28 +153,6 @@ def _split_address_head(addr: str) -> Tuple[Optional[str], Optional[str]]:
     return sido, sigungu
 
 
-# 알려진 안양 소재 시장/상점가 이름 (2025-07-31 스냅샷 관측 + 안양시 공식 정보).
-# 이름 정규화 (whitespace collapse) 후 exact 비교.
-# 만안(M) / 동안(D) 분류는 시장 위치에 따라 매핑.
-# 확실치 않으면 "unknown" 으로 두고 자동 배정하지 않는다.
-ANYANG_MARKETS: dict[str, str] = {
-    # 만안구
-    "안양중앙시장": "manan",
-    "안양중앙인정시장": "manan",
-    "안양중앙지하도상가": "manan",
-    "안양남부시장": "manan",
-    "안양1번가 상점가": "manan",
-    "안양일번가 지하쇼핑몰": "manan",
-    "안양아크로상가골목형상점가": "manan",
-    "안양가구상점가": "manan",
-    "안양농수산물 골목형상점가": "manan",
-    "안양육동시장": "manan",
-    # 동안구
-    "안양관양시장": "dongan",
-    "평촌1번가 상점가": "dongan",
-}
-
-
 def _classify_anyang(
     sido: Optional[str],
     sigungu: Optional[str],
@@ -169,15 +166,16 @@ def _classify_anyang(
 
     반환값:
         "manan" / "dongan" / "unknown" / None
-        - manan/dongan: 알려진 안양 시장에 매칭
+        - manan/dongan: 알려진 안양 시장에 매칭 (anyang_markets.py 사전 참조)
         - unknown: 시장명에 "안양" 포함되지만 구 매핑 사전에 없음
         - None: 안양 아님
     """
-    # 1) 시장명 기반 판정 (2025-07-31 스냅샷 이후 이 방법이 실용적).
+    # 1) 시장명 기반 판정 (anyang_markets.py 사전, single source of truth).
     if market_name:
         mkt = market_name.strip()
-        if mkt in ANYANG_MARKETS:
-            return ANYANG_MARKETS[mkt]
+        coord = ANYANG_MARKET_COORDS.get(mkt)
+        if coord is not None:
+            return coord[2]     # (lat, lng, district) 튜플의 district
         if "안양" in mkt:
             return "unknown"
 

@@ -161,8 +161,10 @@ def test_normalize_valid_anyang_manan():
     assert n.category_source == "product_keyword"
     assert n.registration_year == 2019
     assert n.anyang_district == "manan"
-    assert n.coordinate_valid is False       # 온누리 원본은 좌표 없음
-    assert n.geocode_status == "pending"
+    # 시장명 "안양중앙시장" 이 ANYANG_MARKET_COORDS 에 있어 좌표 부여됨.
+    assert n.coordinate_valid is True
+    assert n.geocode_status == "resolved_market"
+    assert n.latitude is not None and n.longitude is not None
 
 
 def test_normalize_pharmacy_by_product_keyword():
@@ -259,9 +261,10 @@ def test_dry_run_produces_anyang_stats_only():
     #   주소 기반 fallback 은 상세 시군구 있는 경우만.
     assert report.anyang_manan + report.anyang_dongan + report.anyang_unknown >= 8
     assert report.anyang_dongan >= 3    # 동안구 상세 주소 기반 fallback
-    # 좌표는 온누리 원본에 없음 → 모두 geocode 필요.
-    assert report.coord_valid == 0
-    assert report.geocode_required == report.anyang_total
+    # 시장 사전 매핑된 매장은 좌표 부여됨.
+    # fixture 상 "안양중앙시장" 소속 매장 1건 만 매핑 (다른 fixture 매장은 unknown market or 매핑 없음).
+    assert report.coord_valid >= 1
+    assert report.geocode_required <= report.anyang_total
     # 스펙 §결정 2 — marketName 은 category 결정 제외.
     # 시장 소속이라도 products 로 판단하므로 market 카테고리 자체가 등장하지 않을 수 있음.
     # 대신 product_keyword 로 매핑된 항목이 존재해야 함.
