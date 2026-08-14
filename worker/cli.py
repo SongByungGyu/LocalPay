@@ -18,6 +18,8 @@ import sys
 from pathlib import Path
 
 from worker.core.config import load_config
+from worker.importers.geocoding.poc import format_report as format_poc_report
+from worker.importers.geocoding.poc import run_poc as run_kakao_poc
 from worker.importers.local_currency.client import REGION_CODES
 from worker.importers.local_currency.importer import run_dry_run as run_local_currency_dry_run
 from worker.importers.onnuri.importer import run_dry_run as run_onnuri_dry_run
@@ -70,15 +72,65 @@ def main(argv: list[str] | None = None) -> int:
         help="필수. Gate 3-A 는 dry-run 만 허용. DB 에 어떤 쓰기도 발생하지 않는다.",
     )
 
+    p_kakao = sub.add_parser(
+        "kakao-poc",
+        help="Kakao Local Keyword Search PoC — 안양 온누리 sample geocoding (100건 기본)",
+    )
+    p_kakao.add_argument("--file", required=True, type=Path, help="온누리 CSV 경로")
+    p_kakao.add_argument("--sample-size", type=int, default=100)
+    p_kakao.add_argument(
+        "--dry-run",
+        action="store_true",
+        required=True,
+        help="필수. Kakao 실 API 는 호출되지만 DB 에 쓰지 않고 리포트만 출력",
+    )
+
     args = parser.parse_args(argv)
 
     if args.command == "local-currency":
         return _cmd_local_currency(args)
     if args.command == "onnuri":
         return _cmd_onnuri(args)
+    if args.command == "kakao-poc":
+        return _cmd_kakao_poc(args)
 
     parser.print_help()
     return 2
+
+
+def _cmd_kakao_poc(args: argparse.Namespace) -> int:
+    if not args.dry_run:
+        print("ERROR: --dry-run 필수", file=sys.stderr)
+        return 2
+    if not args.file.is_file():
+        print(f"ERROR: file not found: {args.file}", file=sys.stderr)
+        return 2
+
+    import os
+    key = os.environ.get("KAKAO_REST_API_KEY")
+    if not key:
+        print(
+            "ERROR: KAKAO_REST_API_KEY 가 세팅되어 있지 않다.\n"
+            "  - https://developers.kakao.com 에서 앱 만들고 REST API 키 발급 후\n"
+            "  - VPS /opt/localpay/deploy/.env 에 KAKAO_REST_API_KEY=<값> 추가",
+            file=sys.stderr,
+        )
+        return 3
+
+    print(f"[cfg] kakao-poc: file={args.file} sample={args.sample_size}")
+    try:
+        report = run_kakao_poc(
+            csv_path=args.file, kakao_key=key, sample_size=args.sample_size
+        )
+    except Exception as e:  # noqa: BLE001
+        print(f"[error] kakao-poc failed: {e}", file=sys.stderr)
+        return 1
+
+    print()
+    print(format_poc_report(report))
+    print()
+    print("[gate] Kakao PoC 완료. 1,255건 실행은 사용자 승인 대기.")
+    return 0
 
 
 def _cmd_onnuri(args: argparse.Namespace) -> int:
