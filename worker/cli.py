@@ -65,11 +65,27 @@ def main(argv: list[str] | None = None) -> int:
     )
     p_onnuri.add_argument("--limit", type=int, default=None, help="안양 record 상한 (개발/디버깅용)")
     p_onnuri.add_argument("--encoding", default=None, help="CSV encoding 강제 (미지정 시 자동)")
-    p_onnuri.add_argument(
+    p_mode = p_onnuri.add_mutually_exclusive_group(required=True)
+    p_mode.add_argument(
         "--dry-run",
         action="store_true",
-        required=True,
-        help="필수. Gate 3-A 는 dry-run 만 허용. DB 에 어떤 쓰기도 발생하지 않는다.",
+        help="DB 무변경. 통계 · sample 만 출력",
+    )
+    p_mode.add_argument(
+        "--write",
+        action="store_true",
+        help="Gate 3-B1 이상 — raw_onnuri_merchants 에 실제 저장 (idempotent).",
+    )
+    p_onnuri.add_argument(
+        "--snapshot-date",
+        default="2025-07-31",
+        help="스냅샷 기준일 (ISO 8601 YYYY-MM-DD). raw_onnuri_merchants.source_snapshot_date 에 저장",
+    )
+    p_onnuri.add_argument(
+        "--official-metadata-rows",
+        type=int,
+        default=None,
+        help="공식 metadata 상 row count (row_count_discrepancy 판단용, 예: 125589)",
     )
 
     p_kakao = sub.add_parser(
@@ -134,29 +150,51 @@ def _cmd_kakao_poc(args: argparse.Namespace) -> int:
 
 
 def _cmd_onnuri(args: argparse.Namespace) -> int:
-    if not args.dry_run:
-        print("ERROR: --dry-run 필수. Gate 3-A 는 실제 write 를 하지 않는다.", file=sys.stderr)
-        return 2
     if not args.file.is_file():
         print(f"ERROR: file not found: {args.file}", file=sys.stderr)
         return 2
 
-    print(f"[cfg] onnuri dry-run: file={args.file} region={args.region} limit={args.limit}")
+    if args.dry_run:
+        print(f"[cfg] onnuri dry-run: file={args.file} region={args.region} limit={args.limit}")
+        try:
+            report = run_onnuri_dry_run(
+                file_path=args.file,
+                region=args.region,
+                limit=args.limit,
+            )
+        except Exception as e:  # noqa: BLE001
+            print(f"[error] onnuri dry-run failed: {e}", file=sys.stderr)
+            return 1
+        print()
+        print(report.as_text())
+        print()
+        print("[gate] Gate 3-A dry-run 완료. Production DB 에는 어떤 쓰기도 발생하지 않았다.")
+        return 0
 
+    # --- --write 모드 (Gate 3-B1) ---
+    from datetime import date
+    from worker.importers.onnuri.writer import run_write_sync
+
+    snapshot = date.fromisoformat(args.snapshot_date)
+    print(
+        f"[cfg] onnuri --write: file={args.file} snapshot={snapshot} "
+        f"region={args.region} official_meta_rows={args.official_metadata_rows}"
+    )
+    print("  ⚠ raw_onnuri_merchants 에 실제 저장. canonical merchants 및 iOS 는 변경 없음.")
     try:
-        report = run_onnuri_dry_run(
-            file_path=args.file,
-            region=args.region,
-            limit=args.limit,
+        report = run_write_sync(
+            csv_path=args.file,
+            snapshot_date=snapshot,
+            region_filter=args.region,
+            official_metadata_rows=args.official_metadata_rows,
         )
     except Exception as e:  # noqa: BLE001
-        print(f"[error] onnuri dry-run failed: {e}", file=sys.stderr)
+        print(f"[error] onnuri write failed: {e}", file=sys.stderr)
         return 1
-
     print()
     print(report.as_text())
     print()
-    print("[gate] Gate 3-A dry-run 완료. Production DB 에는 어떤 쓰기도 발생하지 않았다.")
+    print("[gate] Gate 3-B1 write 완료. canonical merchants 는 아직 생성되지 않는다.")
     return 0
 
 
