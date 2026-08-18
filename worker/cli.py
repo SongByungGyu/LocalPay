@@ -177,8 +177,13 @@ def _cmd_kakao_poc(args: argparse.Namespace) -> int:
 
 
 def _cmd_onnuri(args: argparse.Namespace) -> int:
-    # --canonical-dryrun --from-db 는 파일 없이 실행 가능.
-    needs_file = not (getattr(args, "canonical_dryrun", False) and getattr(args, "from_db", False))
+    # 아래 모드는 raw_onnuri_merchants DB read 로 실행 → --file 불필요.
+    from_db_only = (
+        (getattr(args, "canonical_dryrun", False) and getattr(args, "from_db", False))
+        or getattr(args, "canonical_write", False)
+        or getattr(args, "canonical_write_dryrun", False)
+    )
+    needs_file = not from_db_only
     if needs_file:
         if args.file is None:
             print("ERROR: --file 필수 (또는 --canonical-dryrun --from-db)", file=sys.stderr)
