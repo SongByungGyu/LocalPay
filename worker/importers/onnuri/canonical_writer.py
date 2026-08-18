@@ -166,72 +166,79 @@ async def _run_write_async(
                 )
                 existing_skipped = len(exists)
         else:
+            first_error_reported = False
             async with conn.transaction():
                 for raw_id, c in candidates:
                     try:
-                        result = await conn.execute(
-                            """
-                            INSERT INTO merchants (
-                                id, name, category,
-                                latitude, longitude, geom,
-                                address, road_address, phone,
-                                supports_onnuri, supports_local_currency, local_currency_name,
-                                supported_payment_types, products, business_hours,
-                                rating, review_count,
-                                market_name, description, last_verified_at,
-                                source, source_id, is_active,
-                                created_at, updated_at,
-                                location_source, location_precision, location_confidence
-                            ) VALUES (
-                                $1, $2, $3,
-                                $4, $5,
-                                CASE WHEN $4 IS NULL OR $5 IS NULL THEN NULL
-                                     ELSE ST_SetSRID(ST_MakePoint($5, $4), 4326)
-                                END,
-                                $6, $7, $8,
-                                $9, $10, $11,
-                                $12::jsonb, $13::jsonb, $14::jsonb,
-                                $15, $16,
-                                $17, $18, $19,
-                                $20, $21, $22,
-                                now(), now(),
-                                $23, $24, $25
+                        # 각 INSERT 를 savepoint 로 감싸 개별 실패 격리
+                        # (postgres 는 트랜잭션 안 에러 후 후속 명령 전부 무시).
+                        async with conn.transaction():
+                            result = await conn.execute(
+                                """
+                                INSERT INTO merchants (
+                                    id, name, category,
+                                    latitude, longitude, geom,
+                                    address, road_address, phone,
+                                    supports_onnuri, supports_local_currency, local_currency_name,
+                                    supported_payment_types, products, business_hours,
+                                    rating, review_count,
+                                    market_name, description, last_verified_at,
+                                    source, source_id, is_active,
+                                    created_at, updated_at,
+                                    location_source, location_precision, location_confidence
+                                ) VALUES (
+                                    $1, $2, $3,
+                                    $4, $5,
+                                    CASE WHEN $4::float IS NULL OR $5::float IS NULL THEN NULL
+                                         ELSE ST_SetSRID(ST_MakePoint($5::float, $4::float), 4326)
+                                    END,
+                                    $6, $7, $8,
+                                    $9, $10, $11,
+                                    $12::jsonb, $13::jsonb, $14::jsonb,
+                                    $15, $16,
+                                    $17, $18, $19,
+                                    $20, $21, $22,
+                                    now(), now(),
+                                    $23, $24, $25
+                                )
+                                ON CONFLICT (id) DO NOTHING
+                                """,
+                                c.id, c.name, c.category,
+                                c.latitude, c.longitude,
+                                c.address, c.road_address, c.phone,
+                                c.supports_onnuri, c.supports_local_currency, c.local_currency_name,
+                                json.dumps(c.supported_payment_types),
+                                json.dumps(c.products),
+                                json.dumps(c.business_hours) if c.business_hours else None,
+                                c.rating, c.review_count,
+                                c.market_name, c.description, None,
+                                c.source, c.source_id, c.is_active,
+                                c.location_source, c.location_precision, c.location_confidence,
                             )
-                            ON CONFLICT (id) DO NOTHING
-                            """,
-                            c.id, c.name, c.category,
-                            c.latitude, c.longitude,
-                            c.address, c.road_address, c.phone,
-                            c.supports_onnuri, c.supports_local_currency, c.local_currency_name,
-                            json.dumps(c.supported_payment_types),
-                            json.dumps(c.products),
-                            json.dumps(c.business_hours) if c.business_hours else None,
-                            c.rating, c.review_count,
-                            c.market_name, c.description, None,
-                            c.source, c.source_id, c.is_active,
-                            c.location_source, c.location_precision, c.location_confidence,
-                        )
-                        if result.endswith(" 1"):
-                            inserted += 1
-                        else:
-                            existing_skipped += 1
+                            if result.endswith(" 1"):
+                                inserted += 1
+                            else:
+                                existing_skipped += 1
 
-                        # merchant_sources link (idempotent via ON CONFLICT).
-                        link_result = await conn.execute(
-                            """
-                            INSERT INTO merchant_sources (
-                                id, merchant_id, source_type, source_provider, raw_id,
-                                confidence, matched_by
-                            ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-                            ON CONFLICT DO NOTHING
-                            """,
-                            uuid.uuid4(), c.id, "onnuri", "komsco-snapshot", raw_id,
-                            "exact", "raw_hash",
-                        )
-                        if link_result.endswith(" 1"):
-                            source_links += 1
-                    except Exception:  # noqa: BLE001
+                            # merchant_sources link (idempotent).
+                            link_result = await conn.execute(
+                                """
+                                INSERT INTO merchant_sources (
+                                    id, merchant_id, source_type, source_provider, raw_id,
+                                    confidence, matched_by
+                                ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+                                """,
+                                uuid.uuid4(), c.id, "onnuri", "komsco-snapshot", raw_id,
+                                "exact", "raw_hash",
+                            )
+                            if link_result.endswith(" 1"):
+                                source_links += 1
+                    except Exception as e:  # noqa: BLE001
                         errors += 1
+                        if not first_error_reported:
+                            import sys
+                            print(f"[write error sample] id={c.id} {type(e).__name__}: {e}", file=sys.stderr)
+                            first_error_reported = True
 
                 # merchant_sources 는 unique 없음 → 재실행 중복 방지 위해 별도 정리 필요.
                 # 여기서는 (merchant_id, raw_id) 중복이 있으면 최신 1개만 남기고 삭제
