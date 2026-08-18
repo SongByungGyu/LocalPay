@@ -90,16 +90,17 @@ Canonical `merchants` 테이블에 아래 3개 필드 추가 예정 (Gate 4 이�
 - `location_precision == "exact"` 는 일반 마커
 - `location_precision == "region_level"` 은 지도 미노출
 
-## Gate 3-B1 현재 상태
+## Gate 3-B2 현재 상태 (2026-08-18)
 
-Raw 저장까지만 완료. Canonical `merchants` 는 아직 이 3개 필드가 없다 (Gate 4 migration `0003_add_location_metadata.py` 예정).
-
-`raw_onnuri_merchants` 안의 매장은 다음 처리 예정:
-- 소속 시장이 `ANYANG_MARKET_COORDS` 사전에 있으면
-  - `location_source = market_dataset` (전통시장 5개) 또는 `market_centroid_manual` (상점가 7개)
-  - `location_precision = market_level`
-  - `location_confidence = 0.8` or `0.7`
-- 매핑 없으면 좌표 없이 저장. `region_level` 로 지도 미노출.
+- Migration `0003_add_location_metadata.py` VPS apply 완료 (`0002 → 0003`, non-destructive).
+- `merchants` 에 `location_source/precision/confidence` 3필드 추가. Dummy 25건 `dummy_seed / exact / 1.0` backfill 완료.
+- Backend `MerchantOut` 응답 스키마에 3필드 추가 (`locationSource/locationPrecision/locationConfidence` camelCase alias).
+- Canonical Candidate 변환기 완성 (`worker/importers/onnuri/canonical.py`) — dry-run 만.
+- `raw_onnuri_merchants` 1,251건 canonical dry-run 결과:
+  - `market_dataset` 564 · `market_centroid_manual` 687
+  - `market_level` 1,251 (모두)
+  - coordinate_valid 1,251
+- **canonical `merchants` 에 실제 INSERT 는 Gate 4 이후.**
 
 ## 관련 파일
 

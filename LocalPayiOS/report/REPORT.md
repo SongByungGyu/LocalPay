@@ -49,6 +49,7 @@
 | [09_Phase13_Gate2A.md](09_Phase13_Gate2A.md) | Phase 13 Gate 2-A — 지역화폐 통합 API 파이프라인 (worker/), fixture dry-run, DB 무변경, Service Key 대기 |
 | [10_Phase13_Gate3A.md](10_Phase13_Gate3A.md) | Phase 13 Gate 3-A — 온누리 CSV 파이프라인 (안양 필터·카테고리·좌표 부재 통계), Gate 2 BLOCKED 문서화, DB 무변경 |
 | [11_Phase13_Gate3B1.md](11_Phase13_Gate3B1.md) | Phase 13 Gate 3-B1 — Migration 0002 apply, Onnuri 안양 1,251건 raw 저장 (idempotent), canonical/iOS/Kakao 무변경 |
+| [12_Phase13_Gate3B2.md](12_Phase13_Gate3B2.md) | Phase 13 Gate 3-B2 — Migration 0003 (location metadata + Dummy backfill), Canonical Candidate dry-run 1,251건, 12시장 aggregation, canonical INSERT 0 |
 
 ## 주요 결정 사항 (요약)
 
