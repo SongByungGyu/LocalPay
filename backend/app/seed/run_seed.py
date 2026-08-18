@@ -60,6 +60,11 @@ async def reset_and_seed() -> tuple[int, int, int]:
                 last_verified_at=row.get("last_verified_at"),
                 source="seed-anyang-v1",
                 is_active=True,
+                # Phase 13 Gate 3-B2 — Dummy seed 는 exact 좌표로 취급 (수동 확인된 값).
+                # docs/LOCATION_PRECISION.md 소스별 기본값 매핑.
+                location_source="dummy_seed",
+                location_precision="exact",
+                location_confidence=1.0,
             )
             session.add(m)
 
