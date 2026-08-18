@@ -50,6 +50,7 @@
 | [10_Phase13_Gate3A.md](10_Phase13_Gate3A.md) | Phase 13 Gate 3-A — 온누리 CSV 파이프라인 (안양 필터·카테고리·좌표 부재 통계), Gate 2 BLOCKED 문서화, DB 무변경 |
 | [11_Phase13_Gate3B1.md](11_Phase13_Gate3B1.md) | Phase 13 Gate 3-B1 — Migration 0002 apply, Onnuri 안양 1,251건 raw 저장 (idempotent), canonical/iOS/Kakao 무변경 |
 | [12_Phase13_Gate3B2.md](12_Phase13_Gate3B2.md) | Phase 13 Gate 3-B2 — Migration 0003 (location metadata + Dummy backfill), Canonical Candidate dry-run 1,251건, 12시장 aggregation, canonical INSERT 0 |
+| [13_Phase13_Gate3C.md](13_Phase13_Gate3C.md) | Phase 13 Gate 3-C — Migration 재현성 fix (seed), 온누리 canonical 1,251건 실 INSERT (idempotent), merchant_sources 연결, Dummy 제외 필터, `/api/v1/markets` API, iOS 시장 마커 + 하단 sheet |
 
 ## 주요 결정 사항 (요약)
 
