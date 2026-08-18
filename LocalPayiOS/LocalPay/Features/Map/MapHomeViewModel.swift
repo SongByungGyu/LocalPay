@@ -22,8 +22,14 @@ final class MapHomeViewModel {
     /// 지도 표시용 Merchant. filter + BBOX 적용된 결과.
     private(set) var visibleMerchants: [Merchant] = []
 
+    /// 시장 대표 마커 (Phase 13 Gate 3-C). BBOX + 필터 적용된 결과.
+    private(set) var visibleMarkets: [MarketAggregate] = []
+
     /// 하단 Preview Card 로 보여줄 선택된 Merchant. 없으면 nil.
     var selectedMerchantId: String?
+
+    /// 하단 시장 sheet 에 표시할 선택된 시장. 없으면 nil.
+    var selectedMarketId: String?
 
     private(set) var isLoading: Bool = false
     private(set) var loadError: String?
@@ -148,12 +154,15 @@ final class MapHomeViewModel {
         let task = Task { [weak self] in
             guard let self else { return }
             do {
-                let result = try await self.repository.mapMerchants(
-                    bbox: bbox,
-                    category: category,
-                    payment: payment
+                // 매장(exact) + 시장 aggregate 병렬 fetch (스펙 §11, §12).
+                async let merchantsAsync = self.repository.mapMerchants(
+                    bbox: bbox, category: category, payment: payment
                 )
-                // 최신 세대만 반영. 그 사이 다른 요청이 세대를 올렸으면 응답 폐기.
+                async let marketsAsync = self.repository.mapMarkets(
+                    bbox: bbox, category: category, payment: payment
+                )
+                let merchants = try await merchantsAsync
+                let markets = try await marketsAsync
                 guard mySeq == self.generation, !Task.isCancelled else {
                     #if DEBUG
                     print("[MapHomeViewModel] stale response dropped (seq=\(mySeq) vs \(self.generation))")
@@ -161,9 +170,10 @@ final class MapHomeViewModel {
                     return
                 }
                 #if DEBUG
-                print("[MapHomeViewModel] BBOX ok count=\(result.count) cat=\(category) pay=\(payment)")
+                print("[MapHomeViewModel] BBOX ok merchants=\(merchants.count) markets=\(markets.count) cat=\(category) pay=\(payment)")
                 #endif
-                self.visibleMerchants = result
+                self.visibleMerchants = merchants
+                self.visibleMarkets = markets
                 self.lastRequestedBBox = bbox
                 self.isLoading = false
             } catch is CancellationError {
@@ -175,10 +185,27 @@ final class MapHomeViewModel {
                 #endif
                 self.loadError = "가맹점 정보를 불러오지 못했습니다."
                 self.visibleMerchants = []
+                self.visibleMarkets = []
                 self.isLoading = false
             }
         }
         currentFetchTask = task
         await task.value
+    }
+
+    // MARK: - Market
+
+    var selectedMarket: MarketAggregate? {
+        guard let id = selectedMarketId else { return nil }
+        return visibleMarkets.first { $0.id == id }
+    }
+
+    func selectMarket(id: String) {
+        selectedMarketId = id
+        selectedMerchantId = nil    // 시장 sheet 열리면 매장 preview 는 닫음
+    }
+
+    func clearMarketSelection() {
+        selectedMarketId = nil
     }
 }

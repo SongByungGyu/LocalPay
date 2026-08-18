@@ -66,6 +66,26 @@ final class DummyMerchantRepository: MerchantRepository {
         }
     }
 
+    /// Dummy 25 매장은 모두 exact 좌표라 market aggregation 결과가 비어 있음. Preview 안전.
+    func mapMarkets(
+        bbox: MapBBox,
+        category: MerchantCategory,
+        payment: PaymentFilter
+    ) async throws -> [MarketAggregate] {
+        []
+    }
+
+    func merchantsInMarket(
+        marketId: String,
+        category: MerchantCategory,
+        payment: PaymentFilter,
+        query: String?,
+        limit: Int,
+        offset: Int
+    ) async throws -> [Merchant] {
+        []
+    }
+
     // MARK: - Private
 
     private func matches(category: MerchantCategory, in m: Merchant) -> Bool {

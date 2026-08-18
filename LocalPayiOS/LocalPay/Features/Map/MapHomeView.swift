@@ -123,6 +123,19 @@ struct MapHomeView: View {
             .navigationDestination(item: $navigateToDetailId) { id in
                 MerchantDetailView(merchantId: id)
             }
+            // Phase 13 Gate 3-C — 시장 마커 탭 시 하단 sheet.
+            .sheet(item: Binding(
+                get: { viewModel.selectedMarket },
+                set: { newValue in
+                    if newValue == nil { viewModel.clearMarketSelection() }
+                }
+            )) { market in
+                MarketDetailSheet(market: market) { merchant in
+                    viewModel.clearMarketSelection()
+                    navigateToDetailId = merchant.id
+                }
+                .presentationDetents([.medium, .large])
+            }
         }
     }
 
@@ -133,6 +146,7 @@ struct MapHomeView: View {
         Map(position: $cameraPosition, selection: $viewModel.selectedMerchantId) {
             UserAnnotation()
 
+            // 개별 매장 마커 (exact 좌표만)
             ForEach(viewModel.markers) { marker in
                 Annotation(
                     "",
@@ -149,6 +163,25 @@ struct MapHomeView: View {
                     }
                 }
                 .tag(marker.id)
+            }
+
+            // Phase 13 Gate 3-C — 시장 대표 마커
+            ForEach(viewModel.visibleMarkets) { market in
+                Annotation(
+                    "",
+                    coordinate: market.coordinate,
+                    anchor: .bottom
+                ) {
+                    MarketMarker(
+                        name: market.name,
+                        count: market.merchantCount,
+                        isSelected: viewModel.selectedMarketId == market.id
+                    )
+                    .onTapGesture {
+                        viewModel.selectMarket(id: market.id)
+                    }
+                }
+                .tag("market-\(market.id)")
             }
         }
         .mapControls {

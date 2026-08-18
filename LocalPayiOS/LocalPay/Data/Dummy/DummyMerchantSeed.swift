@@ -49,7 +49,10 @@ enum DummyMerchantSeed {
                     PaymentVerification(paymentType: .onnuriDigital, succeededAt: daysAgo(0), note: "삼겹살 500g"),
                     PaymentVerification(paymentType: .localCurrency, succeededAt: daysAgo(3), note: "한우 등심"),
                     PaymentVerification(paymentType: .onnuriPaper, succeededAt: daysAgo(7), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 2. 중앙시장 청년반찬
@@ -77,7 +80,10 @@ enum DummyMerchantSeed {
                 ],
                 recentPayments: [
                     PaymentVerification(paymentType: .onnuriCard, succeededAt: daysAgo(1), note: "반찬 3종")
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 3. 범계할머니손칼국수 (음식점)
@@ -105,7 +111,10 @@ enum DummyMerchantSeed {
                 ],
                 recentPayments: [
                     PaymentVerification(paymentType: .localCurrency, succeededAt: daysAgo(1), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 4. 평촌우리약국
@@ -134,7 +143,10 @@ enum DummyMerchantSeed {
                 recentPayments: [
                     PaymentVerification(paymentType: .onnuriDigital, succeededAt: daysAgo(2), note: nil),
                     PaymentVerification(paymentType: .localCurrency, succeededAt: daysAgo(8), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 5. 안양착한카페
@@ -165,7 +177,10 @@ enum DummyMerchantSeed {
                 recentPayments: [
                     PaymentVerification(paymentType: .onnuriDigital, succeededAt: daysAgo(0), note: "아메리카노 2잔"),
                     PaymentVerification(paymentType: .localCurrency, succeededAt: daysAgo(5), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 6. 평촌생활마트
@@ -193,7 +208,10 @@ enum DummyMerchantSeed {
                 ],
                 recentPayments: [
                     PaymentVerification(paymentType: .onnuriDigital, succeededAt: daysAgo(2), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 7. 인덕원분식
@@ -221,7 +239,10 @@ enum DummyMerchantSeed {
                 ],
                 recentPayments: [
                     PaymentVerification(paymentType: .onnuriPaper, succeededAt: daysAgo(1), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 8. 안양미용실
@@ -249,7 +270,10 @@ enum DummyMerchantSeed {
                 ],
                 recentPayments: [
                     PaymentVerification(paymentType: .localCurrency, succeededAt: daysAgo(3), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 9. 범계문구백화점
@@ -277,7 +301,10 @@ enum DummyMerchantSeed {
                 ],
                 recentPayments: [
                     PaymentVerification(paymentType: .onnuriDigital, succeededAt: daysAgo(4), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 10. 평촌한우촌
@@ -306,7 +333,10 @@ enum DummyMerchantSeed {
                 recentPayments: [
                     PaymentVerification(paymentType: .onnuriCard, succeededAt: daysAgo(0), note: "한우 등심 400g"),
                     PaymentVerification(paymentType: .localCurrency, succeededAt: daysAgo(6), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 11. 안양중앙시장 청춘꽃집
@@ -334,7 +364,10 @@ enum DummyMerchantSeed {
                 ],
                 recentPayments: [
                     PaymentVerification(paymentType: .onnuriDigital, succeededAt: daysAgo(1), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 12. 평촌우리제과
@@ -362,7 +395,10 @@ enum DummyMerchantSeed {
                 ],
                 recentPayments: [
                     PaymentVerification(paymentType: .localCurrency, succeededAt: daysAgo(2), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 13. 관양동 새마을수퍼
@@ -387,7 +423,10 @@ enum DummyMerchantSeed {
                 reviews: [],
                 recentPayments: [
                     PaymentVerification(paymentType: .onnuriPaper, succeededAt: daysAgo(5), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 14. 안양중앙시장 옛날통닭
@@ -416,7 +455,10 @@ enum DummyMerchantSeed {
                 recentPayments: [
                     PaymentVerification(paymentType: .onnuriDigital, succeededAt: daysAgo(0), note: nil),
                     PaymentVerification(paymentType: .localCurrency, succeededAt: daysAgo(4), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 15. 안양시청역 안경원
@@ -441,7 +483,10 @@ enum DummyMerchantSeed {
                 reviews: [],
                 recentPayments: [
                     PaymentVerification(paymentType: .localCurrency, succeededAt: daysAgo(7), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 16. 평촌스터디카페
@@ -469,7 +514,10 @@ enum DummyMerchantSeed {
                 ],
                 recentPayments: [
                     PaymentVerification(paymentType: .onnuriDigital, succeededAt: daysAgo(3), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 17. 안양농협 하나로마트 (샘플: 온누리 X, 지역화폐 X — 비사용 케이스로도 하나)
@@ -492,7 +540,10 @@ enum DummyMerchantSeed {
                 description: "일반 카드 및 페이 사용 가능. 상품권은 미사용.",
                 lastVerifiedAt: daysAgo(12),
                 reviews: [],
-                recentPayments: []
+                recentPayments: [],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 18. 안양대박곱창
@@ -521,7 +572,10 @@ enum DummyMerchantSeed {
                 recentPayments: [
                     PaymentVerification(paymentType: .onnuriCard, succeededAt: daysAgo(1), note: nil),
                     PaymentVerification(paymentType: .localCurrency, succeededAt: daysAgo(5), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 19. 관양시장 옹기떡집
@@ -549,7 +603,10 @@ enum DummyMerchantSeed {
                 ],
                 recentPayments: [
                     PaymentVerification(paymentType: .onnuriDigital, succeededAt: daysAgo(2), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 20. 인덕원카페 라온
@@ -574,7 +631,10 @@ enum DummyMerchantSeed {
                 reviews: [],
                 recentPayments: [
                     PaymentVerification(paymentType: .localCurrency, succeededAt: daysAgo(4), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 21. 안양중앙시장 반찬왕
@@ -599,7 +659,10 @@ enum DummyMerchantSeed {
                 reviews: [],
                 recentPayments: [
                     PaymentVerification(paymentType: .onnuriDigital, succeededAt: daysAgo(1), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 22. 만안치과의원 근처 편의점 (etc)
@@ -624,7 +687,10 @@ enum DummyMerchantSeed {
                 reviews: [],
                 recentPayments: [
                     PaymentVerification(paymentType: .localCurrency, succeededAt: daysAgo(6), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 23. 평촌족발
@@ -652,7 +718,10 @@ enum DummyMerchantSeed {
                 ],
                 recentPayments: [
                     PaymentVerification(paymentType: .onnuriDigital, succeededAt: daysAgo(1), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 24. 안양중앙시장 과일가게
@@ -681,7 +750,10 @@ enum DummyMerchantSeed {
                 recentPayments: [
                     PaymentVerification(paymentType: .onnuriDigital, succeededAt: daysAgo(0), note: "사과 1박스"),
                     PaymentVerification(paymentType: .localCurrency, succeededAt: daysAgo(5), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             ),
 
             // 25. 안양 헤어살롱 준
@@ -706,7 +778,10 @@ enum DummyMerchantSeed {
                 reviews: [],
                 recentPayments: [
                     PaymentVerification(paymentType: .onnuriDigital, succeededAt: daysAgo(4), note: nil)
-                ]
+                ],
+                locationSource: nil,
+                locationPrecision: nil,
+                locationConfidence: nil
             )
         ]
     }

@@ -85,4 +85,44 @@ final class RemoteMerchantRepository: MerchantRepository {
             ]
         )
     }
+
+    func mapMarkets(
+        bbox: MapBBox,
+        category: MerchantCategory,
+        payment: PaymentFilter
+    ) async throws -> [MarketAggregate] {
+        try await client.get(
+            "/api/v1/markets/map",
+            query: [
+                "north": String(bbox.north),
+                "south": String(bbox.south),
+                "east": String(bbox.east),
+                "west": String(bbox.west),
+                "category": category == .all ? nil : category.rawValue,
+                "payment": payment.rawValue,
+                "limit": "200"
+            ]
+        )
+    }
+
+    func merchantsInMarket(
+        marketId: String,
+        category: MerchantCategory,
+        payment: PaymentFilter,
+        query: String?,
+        limit: Int,
+        offset: Int
+    ) async throws -> [Merchant] {
+        let encoded = marketId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? marketId
+        return try await client.get(
+            "/api/v1/markets/\(encoded)/merchants",
+            query: [
+                "category": category == .all ? nil : category.rawValue,
+                "payment": payment.rawValue,
+                "q": query,
+                "limit": String(limit),
+                "offset": String(offset)
+            ]
+        )
+    }
 }

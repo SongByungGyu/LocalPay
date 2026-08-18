@@ -37,8 +37,20 @@ struct Merchant: Identifiable, Hashable, Codable, Sendable {
     let reviews: [Review]
     let recentPayments: [PaymentVerification]
 
+    // Phase 13 Gate 3-C — 좌표 신뢰도 메타데이터 (docs/LOCATION_PRECISION.md).
+    // 서버 응답 optional. Codable 자동 합성이 JSON 에 없으면 nil 로 매핑.
+    // DummyMerchantSeed 등 로컬 코드는 nil 세 개 명시 전달.
+    let locationSource: String?
+    let locationPrecision: String?
+    let locationConfidence: Double?
+
     var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
+
+    /// 시장 centroid 좌표 등 개별 매장이 아닌 근사 위치 (docs/MAP_UX_TODO.md).
+    var isMarketLevelLocation: Bool {
+        locationPrecision == "market_level"
     }
 
     /// 결제 수단 표시 헬퍼. Marker 색/아이콘 결정에 사용.
