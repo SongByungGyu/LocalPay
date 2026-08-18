@@ -99,6 +99,7 @@ async def search_merchants(
     payment: str = Query(default="all"),
     limit: int = Query(default=DEFAULT_LIMIT, ge=1, le=MAX_LIMIT),
     offset: int = Query(default=0, ge=0, le=10_000),
+    include_dummy: bool = Query(default=False, description="dev-only: Dummy seed 포함"),
 ) -> List[MerchantOut]:
     # lat/lng 는 함께 주거나 함께 생략해야 한다 (둘 중 하나만 오면 오해 방지 차원에서 400).
     if (lat is None) != (lng is None):
@@ -143,6 +144,8 @@ async def search_merchants(
     if resolved_category:
         stmt = stmt.where(Merchant.category == resolved_category)
     stmt = _apply_payment_filter(stmt, payment)
+    if not include_dummy:
+        stmt = stmt.where(Merchant.source != "seed-anyang-v1")
 
     distance_expr = None
     if lat is not None and lng is not None:
@@ -162,6 +165,8 @@ async def search_merchants(
         if resolved_category:
             stmt = stmt.where(Merchant.category == resolved_category)
         stmt = _apply_payment_filter(stmt, payment)
+        if not include_dummy:
+            stmt = stmt.where(Merchant.source != "seed-anyang-v1")
         # 위치가 있으면 거리순.
         stmt = stmt.order_by("distance_meters")
     else:

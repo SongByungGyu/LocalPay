@@ -57,6 +57,27 @@ def _apply_payment_filter(stmt, payment: str):
     return stmt  # "all"
 
 
+def _apply_dummy_filter(stmt, include_dummy: bool):
+    """Phase 13 Gate 3-C: Dummy 25 (source='seed-anyang-v1') 를 사용자 API 에서 제외.
+
+    ?include_dummy=true 로 명시하면 포함 (개발/디버깅용).
+    """
+    if include_dummy:
+        return stmt
+    return stmt.where(Merchant.source != "seed-anyang-v1")
+
+
+def _exclude_market_level(stmt):
+    """Phase 13 Gate 3-C: 개별 매장 마커용 endpoint 에서는 market_level 좌표 매장 제외.
+
+    market_level 매장은 GET /api/v1/markets/map 으로 시장 대표 마커로 렌더링.
+    """
+    return stmt.where(
+        (Merchant.location_precision.is_(None))
+        | (Merchant.location_precision != "market_level")
+    )
+
+
 def _to_out(merchant: Merchant, distance_meters: Optional[float] = None) -> MerchantOut:
     dumped = MerchantOut.model_validate(merchant)
     if distance_meters is not None:
@@ -75,6 +96,7 @@ async def list_merchants(
     category: Optional[str] = Query(default=None, description="MerchantCategory raw"),
     payment: str = Query(default="all", description="all|onnuri|localCurrency|both"),
     limit: int = Query(default=DEFAULT_LIMIT, ge=1, le=MAX_LIMIT),
+    include_dummy: bool = Query(default=False, description="dev-only: Dummy seed 포함"),
 ) -> List[MerchantOut]:
     if category and category not in VALID_CATEGORIES:
         raise HTTPException(status_code=400, detail=f"invalid category: {category}")
@@ -89,6 +111,7 @@ async def list_merchants(
     if category:
         stmt = stmt.where(Merchant.category == category)
     stmt = _apply_payment_filter(stmt, payment)
+    stmt = _apply_dummy_filter(stmt, include_dummy)
     stmt = stmt.order_by(Merchant.name).limit(limit)
 
     result = await session.execute(stmt)
@@ -115,6 +138,7 @@ async def nearby_merchants(
     limit: int = Query(default=DEFAULT_LIMIT, ge=1, le=MAX_LIMIT),
     category: Optional[str] = Query(default=None),
     payment: str = Query(default="all"),
+    include_dummy: bool = Query(default=False),
 ) -> List[MerchantOut]:
     if category and category not in VALID_CATEGORIES:
         raise HTTPException(status_code=400, detail=f"invalid category: {category}")
@@ -136,6 +160,7 @@ async def nearby_merchants(
     if category:
         stmt = stmt.where(Merchant.category == category)
     stmt = _apply_payment_filter(stmt, payment)
+    stmt = _apply_dummy_filter(stmt, include_dummy)
     stmt = stmt.order_by("distance_meters").limit(limit)
 
     result = await session.execute(stmt)
@@ -158,6 +183,14 @@ async def map_merchants(
     limit: int = Query(default=DEFAULT_LIMIT, ge=1, le=MAX_LIMIT),
     category: Optional[str] = Query(default=None),
     payment: str = Query(default="all"),
+    include_dummy: bool = Query(default=False),
+    include_market_level: bool = Query(
+        default=False,
+        description=(
+            "market_level 매장 포함 여부. 기본 제외 (시장 대표 마커는 /api/v1/markets/map). "
+            "true 로 하면 zoom-in 시 개별 매장 fallback 용."
+        ),
+    ),
 ) -> List[MerchantOut]:
     if north <= south:
         raise HTTPException(status_code=400, detail="north must be greater than south")
@@ -185,6 +218,9 @@ async def map_merchants(
     if category:
         stmt = stmt.where(Merchant.category == category)
     stmt = _apply_payment_filter(stmt, payment)
+    stmt = _apply_dummy_filter(stmt, include_dummy)
+    if not include_market_level:
+        stmt = _exclude_market_level(stmt)
     stmt = stmt.limit(limit)
 
     result = await session.execute(stmt)

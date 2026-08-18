@@ -85,6 +85,19 @@ def main(argv: list[str] | None = None) -> int:
             "입력은 --file (CSV) 또는 --from-db (raw_onnuri_merchants) 중 선택."
         ),
     )
+    p_mode.add_argument(
+        "--canonical-write-dryrun",
+        action="store_true",
+        help="Gate 3-C 사전 검증 — 실제 INSERT 는 하지 않고 기존 canonical 과 충돌만 확인",
+    )
+    p_mode.add_argument(
+        "--canonical-write",
+        action="store_true",
+        help=(
+            "Gate 3-C — raw_onnuri_merchants → canonical merchants INSERT + "
+            "merchant_sources 연결. ON CONFLICT DO NOTHING 로 idempotent."
+        ),
+    )
     p_onnuri.add_argument(
         "--from-db",
         action="store_true",
@@ -177,6 +190,9 @@ def _cmd_onnuri(args: argparse.Namespace) -> int:
     if getattr(args, "canonical_dryrun", False):
         return _cmd_onnuri_canonical_dryrun(args)
 
+    if getattr(args, "canonical_write_dryrun", False) or getattr(args, "canonical_write", False):
+        return _cmd_onnuri_canonical_write(args)
+
     if args.dry_run:
         print(f"[cfg] onnuri dry-run: file={args.file} region={args.region} limit={args.limit}")
         try:
@@ -244,6 +260,33 @@ def _cmd_onnuri_canonical_dryrun(args: argparse.Namespace) -> int:
     print(report.as_text())
     print()
     print("[gate] Gate 3-B2 canonical-dryrun 완료. Production canonical merchants 무변경.")
+    return 0
+
+
+def _cmd_onnuri_canonical_write(args: argparse.Namespace) -> int:
+    from datetime import date
+    from worker.importers.onnuri.canonical_writer import run_write_sync as run_canonical_write
+
+    snapshot = date.fromisoformat(args.snapshot_date)
+    dry_run = getattr(args, "canonical_write_dryrun", False)
+    label = "canonical-write-dryrun" if dry_run else "canonical-write"
+    print(f"[cfg] onnuri --{label}: snapshot={snapshot} region={args.region}")
+    if dry_run:
+        print("  ⚠ 사전 검증 (INSERT 없음). 기존 canonical 과의 id 충돌만 확인.")
+    else:
+        print("  ⚠ 실제 canonical INSERT + merchant_sources 연결 (idempotent).")
+    try:
+        report = run_canonical_write(snapshot_date=snapshot, dry_run=dry_run)
+    except Exception as e:  # noqa: BLE001
+        print(f"[error] {label} failed: {e}", file=sys.stderr)
+        return 1
+    print()
+    print(report.as_text())
+    print()
+    if dry_run:
+        print("[gate] Gate 3-C canonical-write-dryrun 완료. Production 무변경.")
+    else:
+        print("[gate] Gate 3-C canonical-write 완료.")
     return 0
 
 
