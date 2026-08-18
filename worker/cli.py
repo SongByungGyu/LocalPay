@@ -56,7 +56,7 @@ def main(argv: list[str] | None = None) -> int:
         "onnuri",
         help="소상공인시장진흥공단 전국 온누리상품권 가맹점 (Dataset 3060079)",
     )
-    p_onnuri.add_argument("--file", required=True, type=Path, help="공식 CSV 파일 경로")
+    p_onnuri.add_argument("--file", required=False, type=Path, default=None, help="공식 CSV 파일 경로 (--from-db 시 생략 가능)")
     p_onnuri.add_argument(
         "--region",
         default="anyang",
@@ -75,6 +75,20 @@ def main(argv: list[str] | None = None) -> int:
         "--write",
         action="store_true",
         help="Gate 3-B1 이상 — raw_onnuri_merchants 에 실제 저장 (idempotent).",
+    )
+    p_mode.add_argument(
+        "--canonical-dryrun",
+        action="store_true",
+        help=(
+            "Gate 3-B2 — raw → CanonicalMerchantCandidate 변환 dry-run. "
+            "canonical merchants 에 INSERT 하지 않고 통계·market aggregation만 출력. "
+            "입력은 --file (CSV) 또는 --from-db (raw_onnuri_merchants) 중 선택."
+        ),
+    )
+    p_onnuri.add_argument(
+        "--from-db",
+        action="store_true",
+        help="canonical-dryrun 시 CSV 대신 raw_onnuri_merchants 에서 로드",
     )
     p_onnuri.add_argument(
         "--snapshot-date",
@@ -150,9 +164,18 @@ def _cmd_kakao_poc(args: argparse.Namespace) -> int:
 
 
 def _cmd_onnuri(args: argparse.Namespace) -> int:
-    if not args.file.is_file():
-        print(f"ERROR: file not found: {args.file}", file=sys.stderr)
-        return 2
+    # --canonical-dryrun --from-db 는 파일 없이 실행 가능.
+    needs_file = not (getattr(args, "canonical_dryrun", False) and getattr(args, "from_db", False))
+    if needs_file:
+        if args.file is None:
+            print("ERROR: --file 필수 (또는 --canonical-dryrun --from-db)", file=sys.stderr)
+            return 2
+        if not args.file.is_file():
+            print(f"ERROR: file not found: {args.file}", file=sys.stderr)
+            return 2
+
+    if getattr(args, "canonical_dryrun", False):
+        return _cmd_onnuri_canonical_dryrun(args)
 
     if args.dry_run:
         print(f"[cfg] onnuri dry-run: file={args.file} region={args.region} limit={args.limit}")
@@ -195,6 +218,32 @@ def _cmd_onnuri(args: argparse.Namespace) -> int:
     print(report.as_text())
     print()
     print("[gate] Gate 3-B1 write 완료. canonical merchants 는 아직 생성되지 않는다.")
+    return 0
+
+
+def _cmd_onnuri_canonical_dryrun(args: argparse.Namespace) -> int:
+    from datetime import date
+    from worker.importers.onnuri.canonical_dryrun import (
+        run_dryrun_from_csv, run_dryrun_from_db,
+    )
+
+    snapshot = date.fromisoformat(args.snapshot_date)
+    print(f"[cfg] onnuri --canonical-dryrun: snapshot={snapshot} region={args.region} from_db={args.from_db}")
+    print("  ⚠ canonical merchants 에 INSERT 하지 않는다. dry-run 만.")
+    try:
+        if args.from_db:
+            report = run_dryrun_from_db(snapshot_date=snapshot, region=args.region)
+        else:
+            report = run_dryrun_from_csv(
+                csv_path=args.file, snapshot_date=snapshot, region=args.region,
+            )
+    except Exception as e:  # noqa: BLE001
+        print(f"[error] canonical-dryrun failed: {e}", file=sys.stderr)
+        return 1
+    print()
+    print(report.as_text())
+    print()
+    print("[gate] Gate 3-B2 canonical-dryrun 완료. Production canonical merchants 무변경.")
     return 0
 
 
